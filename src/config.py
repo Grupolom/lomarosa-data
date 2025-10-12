@@ -55,3 +55,18 @@ SHAREPOINT_SITE_URL = "https://tuempresa.sharepoint.com/sites/tusite"
 SHAREPOINT_FOLDER = "Documentos Compartidos/Inventarios"
 SHAREPOINT_USERNAME = ""  # Tu email de Microsoft 365
 SHAREPOINT_PASSWORD = ""  # Tu contraseña o usa autenticación segura
+
+
+# ====== CONFIGURACIÓN DE DATOS HISTÓRICOS ======
+# Archivo con histórico de ventas
+CONSOLIDADO_PATH = os.path.join(BASE_DIR, "data", "raw", "consolidado.xlsx")
+CONSOLIDADO_SHEET = "Sheet1"
+
+# Filtros para procesar ventas
+FILTRO_DOC_TIPO = "VENTA"
+FILTRO_LOCAL = "PLANTA GALAN"
+
+# Columna de kilogramos vendidos
+COL_KG_VENDIDOS = "Kg totales2"
+COL_FECHA = "Fecha"
+COL_COD_HISTORICO = "Cod"
