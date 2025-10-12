@@ -16,7 +16,7 @@ EXCEL_PATH = os.path.join(BASE_DIR, "data", "raw", "INVENTARIO_LOMAROSA.xlsx")
 SHEET_NAME = "CONSOLIDADO"
 
 # Fila donde empiezan los encabezados (0-indexed, así que fila 10 = índice 9)
-HEADER_ROW = 9
+HEADER_ROW = 8
 
 # Ruta donde se guardará el dashboard HTML
 OUTPUT_HTML = os.path.join(BASE_DIR, "reports", "dashboard_inventario_lomarosa.html")

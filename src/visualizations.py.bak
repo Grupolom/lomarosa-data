@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 import pandas as pd
-from src import config
+import config
 
 
 class DashboardVisualizations:
@@ -23,26 +23,6 @@ class DashboardVisualizations:
         self.processor = data_processor
         self.df = data_processor.df_processed
         self.stats = data_processor.get_statistics()
-    
-    def _create_error_chart(self, message):
-        """Crea un gráfico con mensaje de error"""
-        fig = go.Figure()
-        
-        fig.add_annotation(
-            text=message,
-            xref="paper", yref="paper",
-            x=0.5, y=0.5,
-            showarrow=False,
-            font=dict(size=14, color="red")
-        )
-        
-        fig.update_layout(
-            height=400,
-            showlegend=False,
-            margin=dict(l=20, r=20, t=60, b=20)
-        )
-        
-        return fig
         
     def create_kpi_cards(self):
         """Crea las tarjetas de KPIs principales"""
@@ -111,13 +91,13 @@ class DashboardVisualizations:
         fig.update_layout(
             title={
                 'text': 'Disponibilidad de Productos',
-                'x': 0,
+                'x': 0,  # Alineado a la izquierda
                 'xanchor': 'left',
                 'font': {'size': 20, 'color': '#333'}
             },
             height=400,
             showlegend=True,
-            legend=dict(orientation="h", yanchor="bottom", y=-0.15, xanchor="left", x=0),
+            legend=dict(orientation="h", yanchor="bottom", y=-0.15, xanchor="left", x=0),  # Leyenda alineada a la izquierda
             margin=dict(l=20, r=20, t=60, b=60)
         )
         
@@ -164,26 +144,50 @@ class DashboardVisualizations:
         
         fig.update_xaxes(showgrid=False, tickangle=-45)
         fig.update_yaxes(showgrid=True, gridcolor='lightgray')
+
         
         return fig
+    
+    def _create_error_chart(self, message):
+        """Crea un gráfico con mensaje de error"""
+        fig = go.Figure()
         
+        fig.add_annotation(
+            text=message,
+            xref="paper", yref="paper",
+            x=0.5, y=0.5,
+            showarrow=False,
+            font=dict(size=14, color="red")
+        )
+        
+        fig.update_layout(
+            height=400,
+            showlegend=False,
+            margin=dict(l=20, r=20, t=60, b=20)
+        )
+        
+        return fig
+
     def create_stock_status_chart(self):
         """Crea gráfico de los 5 productos con mayor diferencia vs su promedio histórico"""
         if self.df is None:
             print("❌ Error: No hay datos cargados")
             return self._create_error_chart("No hay datos disponibles")
-        
+            
         try:
+            print("\n📊 Generando gráfico de comparación...")
             df = self.df.copy()
             
             if self.processor.product_averages is not None and len(self.processor.product_averages) > 0:
-                print("📊 Usando promedios históricos de 'Kg totales2'")
+                print("� Usando promedios históricos de 'Kg totales2'")
                 
                 # Crear DataFrame con stock actual y promedio histórico
                 comparison = pd.DataFrame({
                     'Stock_Actual': df.set_index(config.COL_PRODUCTO)[config.COL_TOTAL],
                     'Promedio_Historico': self.processor.product_averages
                 }).dropna()
+                
+                print(f"\nProductos con datos para comparar: {len(comparison)}")
                 
                 # Calcular diferencia absoluta
                 comparison['diferencia_promedio'] = abs(
@@ -199,17 +203,24 @@ class DashboardVisualizations:
                           f"Promedio={top_diff.loc[prod, 'Promedio_Historico']:.2f}, "
                           f"Dif={top_diff.loc[prod, 'diferencia_promedio']:.2f}")
                 
+                # Preparar datos para el gráfico
+                df_plot = pd.DataFrame({
+                    'Producto': top_diff.index,
+                    'Stock_Actual': top_diff['Stock_Actual'],
+                    'Promedio_Historico': top_diff['Promedio_Historico']
+                })
+                
                 # Crear el gráfico
                 fig = go.Figure()
                 
                 # Agregar barras para el stock actual
                 fig.add_trace(go.Bar(
                     name='Stock Actual',
-                    y=top_diff.index,
-                    x=top_diff['Stock_Actual'],
+                    y=df_plot['Producto'],
+                    x=df_plot['Stock_Actual'],
                     orientation='h',
                     marker=dict(color=config.COLOR_PRIMARY),
-                    text=top_diff['Stock_Actual'].round(2),
+                    text=df_plot['Stock_Actual'].round(2),
                     textposition='outside',
                     hovertemplate='<b>%{y}</b><br>Stock Actual: %{x:.2f} Kg<br><extra></extra>'
                 ))
@@ -217,18 +228,53 @@ class DashboardVisualizations:
                 # Agregar barras para el promedio histórico
                 fig.add_trace(go.Bar(
                     name='Promedio Histórico',
-                    y=top_diff.index,
-                    x=top_diff['Promedio_Historico'],
+                    y=df_plot['Producto'],
+                    x=df_plot['Promedio_Historico'],
                     orientation='h',
                     marker=dict(color=config.COLOR_INFO, opacity=0.5),
-                    text=top_diff['Promedio_Historico'].round(2),
+                    text=df_plot['Promedio_Historico'].round(2),
                     textposition='outside',
                     hovertemplate='<b>%{y}</b><br>Promedio Histórico: %{x:.2f} Kg<br><extra></extra>'
                 ))
                 
+                title_text = 'Top 5 Productos con Mayor Diferencia vs Promedio Histórico'
+            
+            if len(df) == 0:
+                return self._create_error_chart("No hay datos suficientes para comparar")
+            
+            # Obtener los 5 productos con mayor diferencia
+            top_diff = df.nlargest(5, 'diferencia_promedio')
+            
+            # Crear el gráfico
+            fig = go.Figure()
+            
+            # Agregar barras para el stock actual
+            fig.add_trace(go.Bar(
+                name='Stock Actual',
+                y=top_diff[config.COL_PRODUCTO],
+                x=top_diff[config.COL_TOTAL],
+                orientation='h',
+                marker=dict(color=config.COLOR_PRIMARY),
+                text=top_diff[config.COL_TOTAL].round(2),
+                textposition='outside',
+                hovertemplate='<b>%{y}</b><br>Stock Actual: %{x:.2f} Kg<br><extra></extra>'
+            ))
+            
+            # Agregar barras para el promedio
+            fig.add_trace(go.Bar(
+                name='Promedio Histórico',
+                y=top_diff[config.COL_PRODUCTO],
+                x=top_diff[f'{config.COL_TOTAL}_promedio'],
+                orientation='h',
+                marker=dict(color=config.COLOR_INFO, opacity=0.5),
+                text=top_diff[f'{config.COL_TOTAL}_promedio'].round(2),
+                textposition='outside',
+                hovertemplate='<b>%{y}</b><br>Promedio: %{x:.2f} Kg<br><extra></extra>'
+            ))
+            
                 fig.update_layout(
                     title={
-                        'text': 'Top 5 Productos con Mayor Diferencia vs Promedio Histórico',
+                        'text': title_text,
                         'x': 0,
                         'xanchor': 'left',
                         'font': {'size': 20, 'color': '#333'}
@@ -254,7 +300,7 @@ class DashboardVisualizations:
                 fig.update_yaxes(showgrid=False)
                 
                 return fig
-            
+                
             print("⚠️ No hay datos históricos disponibles")
             return self._create_error_chart("No hay datos históricos disponibles para comparar")
             
@@ -263,6 +309,140 @@ class DashboardVisualizations:
             import traceback
             traceback.print_exc()
             return self._create_error_chart(f"Error al crear gráfico: {str(e)}")
+            
+        except Exception as e:
+            print(f"❌ Error al crear gráfico: {str(e)}")
+            return self._create_error_chart(f"Error al crear gráfico: {str(e)}")
+            
+        df = self.df.copy()
+        
+        # Unir con promedios históricos
+        df = df.merge(
+            self.processor.product_averages.reset_index(),
+            on=config.COL_PRODUCTO,
+            how='left',
+            suffixes=('_actual', '_promedio')
+        )
+        
+        # Calcular diferencia con el promedio histórico
+        df['diferencia_promedio'] = abs(df[f'{config.COL_TOTAL}_actual'] - df[f'{config.COL_TOTAL}_promedio'])
+        
+        # Obtener los 5 productos con mayor diferencia
+        top_diff = df.nlargest(5, 'diferencia_promedio')
+        
+        # Crear el gráfico
+        fig = go.Figure()
+        
+        # Agregar barras para el stock actual
+        fig.add_trace(go.Bar(
+            name='Stock Actual',
+            y=top_diff[config.COL_PRODUCTO],
+            x=top_diff[f'{config.COL_TOTAL}_actual'],
+            orientation='h',
+            marker=dict(color=config.COLOR_PRIMARY),
+            text=top_diff[f'{config.COL_TOTAL}_actual'].round(2),
+            textposition='outside',
+            hovertemplate='<b>%{y}</b><br>Stock Actual: %{x:.2f} Kg<br><extra></extra>'
+        ))
+        
+        # Agregar barras para el promedio
+        fig.add_trace(go.Bar(
+            name='Promedio Semanal',
+            y=top_diff[config.COL_PRODUCTO],
+            x=top_diff[f'{config.COL_TOTAL}_promedio'],
+            orientation='h',
+            marker=dict(color=config.COLOR_INFO, opacity=0.5),
+            text=top_diff[f'{config.COL_TOTAL}_promedio'].round(2),
+            textposition='outside',
+            hovertemplate='<b>%{y}</b><br>Promedio: %{x:.2f} Kg<br><extra></extra>'
+        ))
+        
+        fig.update_layout(
+            title={
+                'text': 'Top 5 Productos con Mayor Diferencia vs Promedio Semanal',
+                'x': 0,
+                'xanchor': 'left',
+                'font': {'size': 20, 'color': '#333'}
+            },
+            xaxis_title='Stock (Kg)',
+            yaxis_title='',
+            height=400,
+            showlegend=True,
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
+            ),
+            margin=dict(l=200, r=60, t=80, b=60),
+            plot_bgcolor='rgba(240,240,240,0.5)',
+            paper_bgcolor='white',
+            barmode='group'
+        )
+        
+        fig.update_xaxes(showgrid=True, gridcolor='lightgray')
+        fig.update_yaxes(showgrid=False)
+        
+        return fig
+        
+        # Crear el gráfico
+        fig = go.Figure()
+        
+        # Agregar barras para el stock actual
+        fig.add_trace(go.Bar(
+            name='Stock Actual',
+            y=top_diff[config.COL_PRODUCTO],
+            x=top_diff[config.COL_TOTAL],
+            orientation='h',
+            marker=dict(color=config.COLOR_PRIMARY),
+            text=top_diff[config.COL_TOTAL].round(2),
+            textposition='outside',
+            hovertemplate='<b>%{y}</b><br>Stock: %{x:.2f} Kg<br><extra></extra>'
+        ))
+        
+        # Agregar línea del promedio
+        for i in range(len(top_diff)):
+            fig.add_shape(
+                type="line",
+                x0=promedio,
+                x1=promedio,
+                y0=i-0.4,
+                y1=i+0.4,
+                line=dict(color="red", width=2, dash="dash"),
+            )
+        
+        fig.update_layout(
+            title={
+                'text': 'Top 5 Productos con Mayor Diferencia vs Promedio',
+                'x': 0,
+                'xanchor': 'left',
+                'font': {'size': 20, 'color': '#333'}
+            },
+            xaxis_title='Stock (Kg)',
+            yaxis_title='',
+            height=400,
+            showlegend=True,
+            margin=dict(l=200, r=60, t=80, b=60),
+            plot_bgcolor='rgba(240,240,240,0.5)',
+            paper_bgcolor='white'
+        )
+        
+        # Agregar anotación para el promedio
+        fig.add_annotation(
+            x=promedio,
+            y=len(top_diff),
+            text=f'Promedio: {promedio:.2f} Kg',
+            showarrow=True,
+            arrowhead=1,
+            ax=0,
+            ay=-40
+        )
+        
+        fig.update_xaxes(showgrid=True, gridcolor='lightgray')
+        fig.update_yaxes(showgrid=False)
+        
+        return fig
     
     def create_top_products_chart(self, n=10):
         """Crea gráfico de productos con mayor stock"""
@@ -301,6 +481,8 @@ class DashboardVisualizations:
         
         fig.update_xaxes(showgrid=True, gridcolor='lightgray')
         fig.update_yaxes(showgrid=False)
+
+
         
         return fig
     
