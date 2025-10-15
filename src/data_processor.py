@@ -229,6 +229,44 @@ class DataProcessor:
             # Calcular diferencia
             analisis['Diferencia'] = analisis['Stock_Actual'] - analisis['Promedio_Semanal']
             
+            # ✨ NUEVO: Calcular semanas de stock con casos especiales
+            def calcular_semanas(row):
+                stock = row['Stock_Actual']
+                promedio = row['Promedio_Semanal']
+                
+                # Caso 1: Stock negativo (error del sistema)
+                if stock < 0:
+                    return -999
+                
+                # Caso 2: Sin stock
+                if stock == 0:
+                    return -1
+                
+                # Caso 3: Sin ventas históricas
+                if promedio == 0 or pd.isna(promedio):
+                    return -2
+                
+                # Caso normal: calcular semanas
+                return round(stock / promedio, 1)
+            
+            analisis['Semanas_Stock'] = analisis.apply(calcular_semanas, axis=1)
+            
+            # ✨ NUEVO: Agregar Macropieza desde el consolidado
+            if self.df_historical is not None:
+                # Normalizar códigos en df_historical
+                df_hist = self.df_historical.copy()
+                df_hist['Cod'] = df_hist['Cod'].astype(str).str.strip().str.upper()
+                
+                # Crear mapeo de Cod -> Macropieza (primera ocurrencia)
+                macropieza_map = df_hist.groupby('Cod')['Macropieza'].first().to_dict()
+                
+                # Aplicar mapeo al análisis
+                analisis['Macropieza'] = analisis['Codigo'].map(macropieza_map)
+                analisis['Macropieza'] = analisis['Macropieza'].fillna('Sin clasificar')
+                
+                print(f"✅ Macropiezas agregadas: {analisis['Macropieza'].nunique()} categorías")
+                print(f"📋 Macropiezas encontradas: {sorted(analisis['Macropieza'].unique())}")
+            
             # Eliminar columna duplicada
             if 'Cod' in analisis.columns:
                 analisis = analisis.drop('Cod', axis=1)
@@ -242,6 +280,44 @@ class DataProcessor:
             import traceback
             traceback.print_exc()
             return False
+
+            
+            # ✨ NUEVO: Calcular semanas de stock con casos especiales
+            def calcular_semanas(row):
+                stock = row['Stock_Actual']
+                promedio = row['Promedio_Semanal']
+                
+                # Caso 1: Stock negativo (error del sistema)
+                if stock < 0:
+                    return -999
+                
+                # Caso 2: Sin stock
+                if stock == 0:
+                    return -1
+                
+                # Caso 3: Sin ventas históricas
+                if promedio == 0 or pd.isna(promedio):
+                    return -2
+                
+                # Caso normal: calcular semanas
+                return round(stock / promedio, 1)
+            
+            analisis['Semanas_Stock'] = analisis.apply(calcular_semanas, axis=1)
+            
+            # Eliminar columna duplicada
+            if 'Cod' in analisis.columns:
+                analisis = analisis.drop('Cod', axis=1)
+            
+            self.analisis = analisis
+            print(f"✅ Datos combinados exitosamente: {len(analisis)} productos")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Error al combinar datos: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return False
+
     
     def _categorizar_stock(self, cantidad):
         """Categoriza el nivel de stock"""

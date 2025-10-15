@@ -28,6 +28,7 @@ class HTMLGenerator:
         alerta_html = self.viz.create_alerta_critica()
         resumen_html = self.viz.create_resumen_ejecutivo()
         tabla_criticos_html = self.viz.create_tabla_productos_criticos()
+        tabla_inventario_html = self.viz.create_tabla_inventario_completo()  # ← NUEVA LÍNEA
         
         # Convertir figuras a HTML
         kpi_html = kpi_fig.to_html(include_plotlyjs=False, div_id='kpi-cards')
@@ -137,6 +138,12 @@ class HTMLGenerator:
             font-weight: bold;
         }}
         
+        /* Estilos para tabla interactiva */
+        .table-row:hover {{
+            background-color: #f0f0f0 !important;
+            transition: background-color 0.2s;
+        }}
+        
         /* Responsive */
         @media (max-width: 768px) {{
             .header h1 {{
@@ -199,6 +206,12 @@ class HTMLGenerator:
             <div class="section">
                 <h2 class="section-title">⚠️ Productos que Requieren Atención Inmediata</h2>
                 {tabla_criticos_html}
+            </div>
+            
+            <!-- NUEVA SECCIÓN: Tabla Inventario Completo -->
+            <div class="section">
+                <h2 class="section-title">📦 Inventario Completo Detallado</h2>
+                {tabla_inventario_html}
             </div>
         </div>
         
