@@ -1,72 +1,102 @@
 """
 Archivo de Configuración - Dashboard Inventario Lomarosa
-Modifica estos parámetros según las necesidades de tu empresa
+Usa rutas de OneDrive sincronizado localmente
 """
 
 import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Obtener la ruta base del proyecto
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = Path(__file__).parent.parent
 
-# ====== CONFIGURACIÓN DE RUTAS ======
-# Ruta donde se encuentra el archivo Excel
-EXCEL_PATH = os.path.join(BASE_DIR, "data", "raw", "INVENTARIO_LOMAROSA.xlsx")
 
-# Nombre de la pestaña a procesar
+# ====== MODO DE CARGA ======
+USE_SHAREPOINT = os.getenv('USE_SHAREPOINT', 'False').lower() == 'true'
+
+
+# ====== RUTAS DE ONEDRIVE SINCRONIZADO ======
+# OneDrive sincroniza automáticamente, usa rutas locales dinámicas
+def get_onedrive_path():
+    """Obtiene la ruta base de OneDrive del usuario"""
+    user_profile = os.environ.get('USERPROFILE') or os.environ.get('HOME')
+    
+    # Posibles rutas de OneDrive
+    possible_paths = [
+        Path(user_profile) / 'OneDrive - Universidad del rosario' / 'Escritorio' / 'lomarosa-data',
+        Path(user_profile) / 'OneDrive - Inversiones Agropecuarias Lom SAS' / 'lomarosa-data',
+        Path(user_profile) / 'OneDrive' / 'lomarosa-data',
+        Path(user_profile) / 'OneDrive - Grupo LOM' / 'lomarosa-data',
+        BASE_DIR  # Ruta relativa al proyecto como fallback
+    ]
+    
+    # Devolver la primera ruta que existe
+    for path in possible_paths:
+        if path.exists():
+            return path
+    
+    # Si ninguna existe, usar BASE_DIR
+    return BASE_DIR
+
+
+# Obtener ruta base de OneDrive/proyecto
+PROJECT_ROOT = get_onedrive_path()
+DATA_DIR = PROJECT_ROOT / 'data' / 'raw'
+
+
+# ====== RUTAS DE ARCHIVOS ======
+EXCEL_PATH = DATA_DIR / 'INVENTARIO_LOMAROSA.xlsx'
+CONSOLIDADO_PATH = DATA_DIR / 'consolidado.xlsx'
+
+
+# ====== CONFIGURACIÓN DE EXCEL ======
 SHEET_NAME = "CONSOLIDADO"
-
-# Fila donde empiezan los encabezados (0-indexed, así que fila 10 = índice 9)
+CONSOLIDADO_SHEET = "Sheet1"
 HEADER_ROW = 8
 
-# Ruta donde se guardará el dashboard HTML
-OUTPUT_HTML = os.path.join(BASE_DIR, "reports", "dashboard_inventario_lomarosa.html")
+# Ruta del dashboard HTML
+OUTPUT_HTML = PROJECT_ROOT / 'reports' / 'dashboard_inventario_lomarosa.html'
+
 
 # ====== CONFIGURACIÓN DE COLUMNAS ======
-# Nombres de las columnas en el Excel (deben coincidir exactamente)
 COL_CODIGO = "Codigo"
 COL_PRODUCTO = "Productos"
 COL_TOTAL = "Total"
 COL_UNIDAD = "U/m"
 COL_COMENTARIOS = "Comentarios"
 
-# ====== CONFIGURACIÓN DE ANÁLISIS ======
-# Umbral para considerar stock crítico (en kilos)
-STOCK_CRITICO = 50
 
-# Umbral para stock bajo
+# ====== FILTROS PARA PROCESAR VENTAS ======
+FILTRO_DOC_TIPO = "VENTA"
+FILTRO_LOCAL = "PLANTA GALAN"
+
+COL_KG_VENDIDOS = "Kg totales2"
+COL_FECHA = "Fecha"
+COL_COD_HISTORICO = "Cod"
+
+
+# ====== CONFIGURACIÓN DE ANÁLISIS ======
+STOCK_CRITICO = 50
 STOCK_BAJO = 100
 
+
 # ====== CONFIGURACIÓN VISUAL ======
-# Colores del dashboard
 COLOR_PRIMARY = "#1f77b4"
 COLOR_SUCCESS = "#2ca02c"
 COLOR_WARNING = "#ff7f0e"
 COLOR_DANGER = "#d62728"
 COLOR_INFO = "#17becf"
 
-# Título del dashboard
 DASHBOARD_TITLE = "Dashboard de Inventario - Lomarosa"
 COMPANY_NAME = "Inversiones Agropecuarias Lom SAS"
 
-# ====== CONFIGURACIÓN DE SHAREPOINT (OPCIONAL) ======
-# Si usas SharePoint Online, configura estos parámetros
-USE_SHAREPOINT = False  # Cambiar a True para activar
-SHAREPOINT_SITE_URL = "https://tuempresa.sharepoint.com/sites/tusite"
-SHAREPOINT_FOLDER = "Documentos Compartidos/Inventarios"
-SHAREPOINT_USERNAME = ""  # Tu email de Microsoft 365
-SHAREPOINT_PASSWORD = ""  # Tu contraseña o usa autenticación segura
 
-
-# ====== CONFIGURACIÓN DE DATOS HISTÓRICOS ======
-# Archivo con histórico de ventas
-CONSOLIDADO_PATH = os.path.join(BASE_DIR, "data", "raw", "consolidado.xlsx")
-CONSOLIDADO_SHEET = "Sheet1"
-
-# Filtros para procesar ventas
-FILTRO_DOC_TIPO = "VENTA"
-FILTRO_LOCAL = "PLANTA GALAN"
-
-# Columna de kilogramos vendidos
-COL_KG_VENDIDOS = "Kg totales2"
-COL_FECHA = "Fecha"
-COL_COD_HISTORICO = "Cod"
+# Debug: Mostrar rutas al cargar
+if __name__ == "__main__":
+    print(f"PROJECT_ROOT: {PROJECT_ROOT}")
+    print(f"EXCEL_PATH: {EXCEL_PATH}")
+    print(f"CONSOLIDADO_PATH: {CONSOLIDADO_PATH}")
+    print(f"Existe EXCEL_PATH: {EXCEL_PATH.exists()}")
+    print(f"Existe CONSOLIDADO_PATH: {CONSOLIDADO_PATH.exists()}")

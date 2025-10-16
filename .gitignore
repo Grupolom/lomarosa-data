@@ -258,3 +258,12 @@ ehthumbs.db
 # Logs
 *.log
 logs/
+
+# Credenciales
+.env
+*.env
+.env.local
+
+# Datos sensibles
+data/raw/*.xlsx
+data/processed/*.xlsx

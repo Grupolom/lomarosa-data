@@ -6,3 +6,8 @@ numpy>=1.24.0
 # For running notebooks and providing a Jupyter kernel
 jupyter>=1.0.0
 ipykernel>=6.0.0
+
+Office365-REST-Python-Client==2.5.3
+python-dotenv==1.0.0
+
+requests==2.31.0

@@ -1,6 +1,7 @@
 """
 Módulo de Procesamiento de Datos - Dashboard Inventario Lomarosa
 Incluye análisis con datos históricos de ventas
+ACTUALIZADO: Carga datos desde SharePoint/OneDrive usando enlaces compartidos
 """
 
 import os
@@ -9,6 +10,15 @@ import numpy as np
 from datetime import datetime
 import config
 import warnings
+
+# Importar SharePointLoader solo si está habilitado
+if config.USE_SHAREPOINT:
+    try:
+        from sharepoint_loader import SharePointLoader
+    except ImportError:
+        print("⚠️ No se pudo importar SharePointLoader. Modo SharePoint desactivado.")
+        config.USE_SHAREPOINT = False
+
 warnings.filterwarnings('ignore')
 
 
@@ -16,60 +26,111 @@ class DataProcessor:
     """Clase para procesar los datos del inventario y ventas históricas"""
     
     def __init__(self, excel_path=None):
+        """
+        Inicializa el procesador de datos
+        
+        Args:
+            excel_path: Ruta local del Excel (solo para modo local)
+        """
         self.excel_path = excel_path or config.EXCEL_PATH
+        self.use_sharepoint = config.USE_SHAREPOINT
+        self.sharepoint_loader = None
+        
         self.df = None
         self.df_processed = None
         self.df_historical = None
         self.promedios = None
         self.analisis = None
         
+        # Inicializar SharePoint si está habilitado
+        if self.use_sharepoint:
+            try:
+                print("🌐 Iniciando conexión con SharePoint Online...")
+                self.sharepoint_loader = SharePointLoader()
+                print("✅ Modo: Carga desde SharePoint Online activado")
+            except Exception as e:
+                print(f"⚠️ Error al inicializar SharePoint: {str(e)}")
+                print("⚠️ Fallback: cambiando a modo local")
+                self.use_sharepoint = False
+        
+        if not self.use_sharepoint:
+            print("💾 Modo: Carga desde archivos locales")
+    
     def load_data(self):
-        """Carga los datos desde el archivo Excel de inventario"""
+        """Carga los datos desde SharePoint/OneDrive o archivo local"""
         try:
-            print(f"📂 Cargando datos desde: {self.excel_path}")
-            
-            if not os.path.exists(self.excel_path):
-                print(f"❌ El archivo no existe en la ruta: {self.excel_path}")
-                return False
-            
-            # Cargar con skiprows=9 como en el notebook
-            self.df = pd.read_excel(
-                self.excel_path,
-                sheet_name=config.SHEET_NAME,
-                skiprows=9,
-                engine='openpyxl'
-            )
+            if self.use_sharepoint and self.sharepoint_loader:
+                # ✨ CARGAR DESDE SHAREPOINT/ONEDRIVE (enlaces compartidos)
+                print(f"\n📂 Cargando inventario desde SharePoint/OneDrive...")
+                
+                self.df = self.sharepoint_loader.load_excel_from_sharepoint(
+                    file_type='inventario',
+                    sheet_name=config.SHEET_NAME,
+                    skiprows=9
+                )
+                
+            else:
+                # CARGAR DESDE LOCAL (código original)
+                print(f"\n📂 Cargando inventario desde archivo local...")
+                print(f"   Ruta: {self.excel_path}")
+                
+                if not os.path.exists(self.excel_path):
+                    print(f"❌ El archivo no existe en la ruta: {self.excel_path}")
+                    return False
+                
+                self.df = pd.read_excel(
+                    self.excel_path,
+                    sheet_name=config.SHEET_NAME,
+                    skiprows=9,
+                    engine='openpyxl'
+                )
             
             self.df.columns = self.df.columns.str.strip()
             
-            print(f"✅ Datos cargados exitosamente: {len(self.df)} filas")
-            print(f"📋 Columnas detectadas: {list(self.df.columns)}")
+            print(f"✅ Inventario cargado: {len(self.df)} filas")
+            print(f"📋 Columnas: {list(self.df.columns)}")
             return True
+            
         except Exception as e:
-            print(f"❌ Error al cargar datos: {str(e)}")
+            print(f"❌ Error al cargar inventario: {str(e)}")
             import traceback
             traceback.print_exc()
             return False
     
     def load_historical_data(self):
-        """Carga datos históricos de ventas desde consolidado.xlsx"""
+        """Carga datos históricos desde SharePoint/OneDrive o archivo local"""
         try:
-            print(f"📊 Cargando datos históricos...")
+            if self.use_sharepoint and self.sharepoint_loader:
+                # ✨ CARGAR DESDE SHAREPOINT/ONEDRIVE (enlaces compartidos)
+                print(f"\n📊 Cargando consolidado desde SharePoint/OneDrive...")
+                
+                self.df_historical = self.sharepoint_loader.load_excel_from_sharepoint(
+                    file_type='consolidado',
+                    sheet_name=config.CONSOLIDADO_SHEET,
+                    skiprows=0
+                )
+                
+            else:
+                # CARGAR DESDE LOCAL (código original)
+                print(f"\n📊 Cargando consolidado desde archivo local...")
+                
+                if not os.path.exists(config.CONSOLIDADO_PATH):
+                    print(f"⚠️ No se encontró archivo histórico: {config.CONSOLIDADO_PATH}")
+                    return False
+                
+                self.df_historical = pd.read_excel(
+                    config.CONSOLIDADO_PATH,
+                    sheet_name=config.CONSOLIDADO_SHEET,
+                    engine='openpyxl'
+                )
             
-            if not os.path.exists(config.CONSOLIDADO_PATH):
-                print(f"⚠️ No se encontró archivo histórico: {config.CONSOLIDADO_PATH}")
-                return False
-            
-            self.df_historical = pd.read_excel(
-                config.CONSOLIDADO_PATH,
-                sheet_name=config.CONSOLIDADO_SHEET,
-                engine='openpyxl'
-            )
-            
-            print(f"✅ Datos históricos cargados: {len(self.df_historical)} registros")
+            print(f"✅ Consolidado cargado: {len(self.df_historical)} registros")
             return True
+            
         except Exception as e:
-            print(f"⚠️ Error al cargar histórico: {str(e)}")
+            print(f"⚠️ Error al cargar consolidado: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return False
     
     def clean_data(self):
@@ -112,7 +173,7 @@ class DataProcessor:
                 'Total': 'Stock_Actual'
             })
             
-            # Crear categorías de stock (mantener compatibilidad)
+            # Crear categorías de stock
             inventario_procesado['categoria_stock'] = inventario_procesado['Stock_Actual'].apply(self._categorizar_stock)
             inventario_procesado['categoria_producto'] = inventario_procesado['Producto'].apply(self._categorizar_producto)
             inventario_procesado['disponible'] = inventario_procesado['Stock_Actual'] > 0
@@ -198,7 +259,7 @@ class DataProcessor:
         try:
             print("🔗 Combinando inventario con ventas...")
             
-            # Convertir códigos a string para merge (como en el notebook)
+            # Convertir códigos a string para merge
             inventario = self.df_processed.copy()
             promedios = self.promedios.copy()
             
@@ -229,43 +290,29 @@ class DataProcessor:
             # Calcular diferencia
             analisis['Diferencia'] = analisis['Stock_Actual'] - analisis['Promedio_Semanal']
             
-            # ✨ NUEVO: Calcular semanas de stock con casos especiales
+            # Calcular semanas de stock con casos especiales
             def calcular_semanas(row):
                 stock = row['Stock_Actual']
                 promedio = row['Promedio_Semanal']
                 
-                # Caso 1: Stock negativo (error del sistema)
                 if stock < 0:
                     return -999
-                
-                # Caso 2: Sin stock
                 if stock == 0:
                     return -1
-                
-                # Caso 3: Sin ventas históricas
                 if promedio == 0 or pd.isna(promedio):
                     return -2
-                
-                # Caso normal: calcular semanas
                 return round(stock / promedio, 1)
             
             analisis['Semanas_Stock'] = analisis.apply(calcular_semanas, axis=1)
             
-            # ✨ NUEVO: Agregar Macropieza desde el consolidado
+            # Agregar Macropieza desde el consolidado
             if self.df_historical is not None:
-                # Normalizar códigos en df_historical
                 df_hist = self.df_historical.copy()
                 df_hist['Cod'] = df_hist['Cod'].astype(str).str.strip().str.upper()
-                
-                # Crear mapeo de Cod -> Macropieza (primera ocurrencia)
                 macropieza_map = df_hist.groupby('Cod')['Macropieza'].first().to_dict()
-                
-                # Aplicar mapeo al análisis
                 analisis['Macropieza'] = analisis['Codigo'].map(macropieza_map)
                 analisis['Macropieza'] = analisis['Macropieza'].fillna('Sin clasificar')
-                
                 print(f"✅ Macropiezas agregadas: {analisis['Macropieza'].nunique()} categorías")
-                print(f"📋 Macropiezas encontradas: {sorted(analisis['Macropieza'].unique())}")
             
             # Eliminar columna duplicada
             if 'Cod' in analisis.columns:
@@ -280,44 +327,6 @@ class DataProcessor:
             import traceback
             traceback.print_exc()
             return False
-
-            
-            # ✨ NUEVO: Calcular semanas de stock con casos especiales
-            def calcular_semanas(row):
-                stock = row['Stock_Actual']
-                promedio = row['Promedio_Semanal']
-                
-                # Caso 1: Stock negativo (error del sistema)
-                if stock < 0:
-                    return -999
-                
-                # Caso 2: Sin stock
-                if stock == 0:
-                    return -1
-                
-                # Caso 3: Sin ventas históricas
-                if promedio == 0 or pd.isna(promedio):
-                    return -2
-                
-                # Caso normal: calcular semanas
-                return round(stock / promedio, 1)
-            
-            analisis['Semanas_Stock'] = analisis.apply(calcular_semanas, axis=1)
-            
-            # Eliminar columna duplicada
-            if 'Cod' in analisis.columns:
-                analisis = analisis.drop('Cod', axis=1)
-            
-            self.analisis = analisis
-            print(f"✅ Datos combinados exitosamente: {len(analisis)} productos")
-            return True
-            
-        except Exception as e:
-            print(f"❌ Error al combinar datos: {str(e)}")
-            import traceback
-            traceback.print_exc()
-            return False
-
     
     def _categorizar_stock(self, cantidad):
         """Categoriza el nivel de stock"""
@@ -371,7 +380,6 @@ class DataProcessor:
             'fecha_actualizacion': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
         
-        # Agregar estadísticas de análisis si existen
         if self.analisis is not None:
             stats['stock_adecuado'] = len(self.analisis[self.analisis['Estado'] == 'Stock Adecuado'])
             stats['bajo_promedio'] = len(self.analisis[self.analisis['Estado'] == 'Bajo Promedio'])
@@ -385,15 +393,12 @@ class DataProcessor:
             return None
         
         df = self.df_processed
-        
         category_data = df.groupby('categoria_producto').agg({
             'Stock_Actual': ['sum', 'count', 'mean'],
             'disponible': 'sum'
         }).round(2)
-        
         category_data.columns = ['stock_total', 'num_productos', 'stock_promedio', 'productos_disponibles']
         category_data = category_data.reset_index()
-        
         return category_data
     
     def get_critical_products(self):
@@ -402,14 +407,11 @@ class DataProcessor:
             return None
         
         df = self.df_processed
-        
         critical = df[
             (df['categoria_stock'] == 'Sin Stock') | 
             (df['categoria_stock'] == 'Crítico')
         ].copy()
-        
         critical = critical.sort_values('Stock_Actual')
-        
         cols_to_show = ['Codigo', 'Producto', 'Stock_Actual', 'categoria_stock']
         return critical[cols_to_show]
     
@@ -417,21 +419,18 @@ class DataProcessor:
         """Obtiene productos con mayor sobrestock"""
         if self.analisis is None:
             return None
-        
         return self.analisis.nlargest(n, 'Diferencia')
     
     def get_top_deficit(self, n=10):
         """Obtiene productos con mayor déficit"""
         if self.analisis is None:
             return None
-        
         return self.analisis.nsmallest(n, 'Diferencia')
     
     def get_top_rotacion(self, n=10):
-        """Obtiene productos con mayor rotación (más ventas)"""
+        """Obtiene productos con mayor rotación"""
         if self.analisis is None:
             return None
-        
         return self.analisis.nlargest(n, 'Num_Ventas')
     
     def get_productos_criticos_ventas(self, n=5):
@@ -443,9 +442,7 @@ class DataProcessor:
             (self.analisis['Promedio_Semanal'] > 0) & 
             (self.analisis['Stock_Actual'] < self.analisis['Promedio_Semanal'])
         ].copy()
-        
         criticos['Ratio_Cobertura'] = criticos['Stock_Actual'] / criticos['Promedio_Semanal']
-        
         return criticos.sort_values('Ratio_Cobertura').head(n)
     
     def process(self):
@@ -455,7 +452,6 @@ class DataProcessor:
         if not self.clean_data():
             return False
         
-        # Intentar cargar y procesar histórico
         if self.load_historical_data():
             if self.process_historical_sales():
                 self.merge_with_historical()
