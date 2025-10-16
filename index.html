@@ -1,0 +1,2057 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Inventario - Lomarosa</title>
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .company-name {
+            font-size: 1.1em;
+            margin-top: 10px;
+            font-weight: 300;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.8em;
+            color: #667eea;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            color: #666;
+            border-top: 1px solid #ddd;
+        }
+        
+        .update-info {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        
+        /* Estilos para tabla interactiva */
+        .table-row:hover {
+            background-color: #f0f0f0 !important;
+            transition: background-color 0.2s;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            body {
+                padding: 10px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📊 Dashboard de Inventario - Lomarosa</h1>
+            <p class="company-name">Inversiones Agropecuarias Lom SAS</p>
+            <div class="update-info">🕒 Última actualización: 2025-10-16 17:27:39</div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <!-- KPIs Section -->
+            <div class="section">
+                <h2 class="section-title">📈 Indicadores Principales</h2>
+                <div class="chart-container">
+                    <html>
+<head><meta charset="utf-8" /></head>
+<body>
+    <div>                            <div id="kpi-cards" class="plotly-graph-div" style="height:300px; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("kpi-cards")) {                    Plotly.newPlot(                        "kpi-cards",                        [{"domain":{"column":0,"row":0,"x":[0.0,0.2125],"y":[0.0,1.0]},"mode":"number","number":{"font":{"color":"#3498DB","size":50},"valueformat":","},"title":{"font":{"color":"#2C3E50","size":16},"text":"\u003cspan style='font-size:0.8em;'\u003een inventario\u003c\u002fspan\u003e"},"value":55,"type":"indicator"},{"domain":{"column":1,"row":0,"x":[0.2625,0.475],"y":[0.0,1.0]},"mode":"number","number":{"font":{"color":"#2ECC71","size":50},"valueformat":","},"title":{"font":{"color":"#2C3E50","size":16},"text":"\u003cspan style='font-size:0.8em;'\u003esobre el promedio\u003c\u002fspan\u003e"},"value":25,"type":"indicator"},{"domain":{"column":2,"row":0,"x":[0.525,0.7375],"y":[0.0,1.0]},"mode":"number","number":{"font":{"color":"#E74C3C","size":50},"valueformat":","},"title":{"font":{"color":"#2C3E50","size":16},"text":"\u003cspan style='font-size:0.8em;'\u003ebajo el promedio\u003c\u002fspan\u003e"},"value":30,"type":"indicator"},{"domain":{"column":3,"row":0,"x":[0.7875,1.0],"y":[0.0,1.0]},"mode":"number","number":{"font":{"color":"#F1C40F","size":50},"valueformat":",.1f"},"title":{"font":{"color":"#2C3E50","size":16},"text":"\u003cspan style='font-size:0.8em;'\u003ekilogramos\u003c\u002fspan\u003e"},"value":10417.98,"type":"indicator"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"annotations":[{"font":{"size":16},"showarrow":false,"text":"Total Productos","x":0.10625,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"Stock Adecuado","x":0.36875,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"Bajo Stock","x":0.6312500000000001,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"Stock Total (kg)","x":0.89375,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"}],"margin":{"t":120,"b":20,"l":20,"r":20},"title":{"font":{"size":24,"color":"#2C3E50"},"text":"\u003cb\u003ePanel de Control de Inventario\u003c\u002fb\u003e","x":0.5,"y":0.95,"xanchor":"center","yanchor":"top"},"grid":{"rows":1,"columns":4,"pattern":"independent"},"height":300,"showlegend":false,"paper_bgcolor":"white","plot_bgcolor":"white"},                        {"responsive": true}                    )                };            </script>        </div>
+</body>
+</html>
+                </div>
+            </div>
+            
+            <!-- Alerta Crítica -->
+            <div class="section">
+                
+        <div style="background-color:#FFEBEE; border:2px solid #E57373; border-radius:8px; padding:20px; margin:20px 0; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+            <div style="display:flex; align-items:center; margin-bottom:15px; color:#D32F2F;">
+                <span style="font-size:24px; margin-right:10px;">⚠️</span>
+                <h3 style="margin:0; font-size:20px;">Alerta Crítica</h3>
+            </div>
+            <p style="color:#555; font-size:16px; margin:0;">
+                Hay <strong>30</strong> producto(s) con stock por debajo del promedio semanal de ventas.
+            </p>
+            <div style='margin-top:15px; padding-top:15px; border-top:1px solid #FFCDD2;'><strong>Productos más críticos:</strong><br><div style='margin:5px 0; color:#555;'>• BONDIOLA: Stock 19.6 kg vs Promedio 547.2 kg (Déficit: 527.6 kg)</div><div style='margin:5px 0; color:#555;'>• TOCINO PIANO SIN PIEL: Stock 10.8 kg vs Promedio 145.5 kg (Déficit: 134.7 kg)</div><div style='margin:5px 0; color:#555;'>• BRAZO PULPO: Stock 51.7 kg vs Promedio 667.2 kg (Déficit: 615.5 kg)</div><div style='margin:5px 0; color:#555;'>• CARNE MOLIDA: Stock 10.2 kg vs Promedio 120.2 kg (Déficit: 110.0 kg)</div><div style='margin:5px 0; color:#555;'>• HUESO POROZO: Stock 54.8 kg vs Promedio 537.0 kg (Déficit: 482.2 kg)</div></div>
+        </div>
+        
+            </div>
+            
+            <!-- Dashboard Completo 2x2 -->
+            <div class="section">
+                <h2 class="section-title">📊 Análisis Completo de Inventario</h2>
+                <div class="chart-container">
+                    <html>
+<head><meta charset="utf-8" /></head>
+<body>
+    <div>                            <div id="dashboard-completo" class="plotly-graph-div" style="height:1150px; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("dashboard-completo")) {                    Plotly.newPlot(                        "dashboard-completo",                        [{"marker":{"color":"#E74C3C"},"name":"Stock Actual","opacity":0.7,"showlegend":true,"x":["PUNTAS DE COSTILLA"],"y":[1180.65],"type":"bar","xaxis":"x","yaxis":"y"},{"marker":{"color":"#3498DB","line":{"color":"white","width":2},"size":10,"symbol":"diamond"},"mode":"markers","name":"Promedio Semanal","showlegend":true,"x":["PUNTAS DE COSTILLA"],"y":[475.75857954545455],"type":"scatter","xaxis":"x","yaxis":"y"},{"marker":{"color":"#E74C3C"},"name":"Stock Actual","opacity":0.7,"showlegend":false,"x":["CABEZA DE LOMO"],"y":[761.8],"type":"bar","xaxis":"x","yaxis":"y"},{"marker":{"color":"#3498DB","line":{"color":"white","width":2},"size":10,"symbol":"diamond"},"mode":"markers","name":"Promedio Semanal","showlegend":false,"x":["CABEZA DE LOMO"],"y":[214.10070075757574],"type":"scatter","xaxis":"x","yaxis":"y"},{"marker":{"color":"#E74C3C"},"name":"Stock Actual","opacity":0.7,"showlegend":false,"x":["PERNIL DESPOSTE "],"y":[507.25],"type":"bar","xaxis":"x","yaxis":"y"},{"marker":{"color":"#3498DB","line":{"color":"white","width":2},"size":10,"symbol":"diamond"},"mode":"markers","name":"Promedio Semanal","showlegend":false,"x":["PERNIL DESPOSTE "],"y":[0.0],"type":"scatter","xaxis":"x","yaxis":"y"},{"marker":{"color":"#E74C3C"},"name":"Stock Actual","opacity":0.7,"showlegend":false,"x":["CHULETA DE BRAZO"],"y":[560.7999999999998],"type":"bar","xaxis":"x","yaxis":"y"},{"marker":{"color":"#3498DB","line":{"color":"white","width":2},"size":10,"symbol":"diamond"},"mode":"markers","name":"Promedio Semanal","showlegend":false,"x":["CHULETA DE BRAZO"],"y":[191.54221969696968],"type":"scatter","xaxis":"x","yaxis":"y"},{"marker":{"color":"#E74C3C"},"name":"Stock Actual","opacity":0.7,"showlegend":false,"x":["Chorizo Ahumado x19 Unds"],"y":[471.0],"type":"bar","xaxis":"x","yaxis":"y"},{"marker":{"color":"#3498DB","line":{"color":"white","width":2},"size":10,"symbol":"diamond"},"mode":"markers","name":"Promedio Semanal","showlegend":false,"x":["Chorizo Ahumado x19 Unds"],"y":[103.9659090909091],"type":"scatter","xaxis":"x","yaxis":"y"},{"marker":{"color":"#E74C3C"},"name":"Stock Actual","opacity":0.7,"showlegend":false,"x":["BRAZO DESPOSTE "],"y":[210.0],"type":"bar","xaxis":"x","yaxis":"y"},{"marker":{"color":"#3498DB","line":{"color":"white","width":2},"size":10,"symbol":"diamond"},"mode":"markers","name":"Promedio Semanal","showlegend":false,"x":["BRAZO DESPOSTE "],"y":[0.0],"type":"scatter","xaxis":"x","yaxis":"y"},{"marker":{"color":"#E74C3C"},"name":"Stock Actual","opacity":0.7,"showlegend":false,"x":["COSTILLA BABY BACK"],"y":[436.54999999999995],"type":"bar","xaxis":"x","yaxis":"y"},{"marker":{"color":"#3498DB","line":{"color":"white","width":2},"size":10,"symbol":"diamond"},"mode":"markers","name":"Promedio Semanal","showlegend":false,"x":["COSTILLA BABY BACK"],"y":[238.45380681818182],"type":"scatter","xaxis":"x","yaxis":"y"},{"marker":{"color":"#E74C3C"},"name":"Stock Actual","opacity":0.7,"showlegend":false,"x":["GOULASH ESPECIAL"],"y":[267.25],"type":"bar","xaxis":"x","yaxis":"y"},{"marker":{"color":"#3498DB","line":{"color":"white","width":2},"size":10,"symbol":"diamond"},"mode":"markers","name":"Promedio Semanal","showlegend":false,"x":["GOULASH ESPECIAL"],"y":[83.89181818181818],"type":"scatter","xaxis":"x","yaxis":"y"},{"marker":{"color":"#E74C3C"},"name":"Stock Actual","opacity":0.7,"showlegend":false,"x":["COSTILLA INDUSTRIAL"],"y":[190.85],"type":"bar","xaxis":"x","yaxis":"y"},{"marker":{"color":"#3498DB","line":{"color":"white","width":2},"size":10,"symbol":"diamond"},"mode":"markers","name":"Promedio Semanal","showlegend":false,"x":["COSTILLA INDUSTRIAL"],"y":[11.496969696969698],"type":"scatter","xaxis":"x","yaxis":"y"},{"marker":{"color":"#E74C3C"},"name":"Stock Actual","opacity":0.7,"showlegend":false,"x":["ASERRIN"],"y":[156.6],"type":"bar","xaxis":"x","yaxis":"y"},{"marker":{"color":"#3498DB","line":{"color":"white","width":2},"size":10,"symbol":"diamond"},"mode":"markers","name":"Promedio Semanal","showlegend":false,"x":["ASERRIN"],"y":[35.1148106060606],"type":"scatter","xaxis":"x","yaxis":"y"},{"marker":{"color":"#E67E22"},"name":"Stock Actual","opacity":0.7,"showlegend":false,"x":["MILANESA DE PIERNA"],"y":[689.65],"type":"bar","xaxis":"x2","yaxis":"y2"},{"marker":{"color":"#3498DB","line":{"color":"white","width":2},"size":10,"symbol":"diamond"},"mode":"markers","name":"Promedio Semanal","showlegend":false,"x":["MILANESA DE PIERNA"],"y":[3248.3494696969697],"type":"scatter","xaxis":"x2","yaxis":"y2"},{"marker":{"color":"#E67E22"},"name":"Stock Actual","opacity":0.7,"showlegend":false,"x":["CABEZA"],"y":[211.8],"type":"bar","xaxis":"x2","yaxis":"y2"},{"marker":{"color":"#3498DB","line":{"color":"white","width":2},"size":10,"symbol":"diamond"},"mode":"markers","name":"Promedio Semanal","showlegend":false,"x":["CABEZA"],"y":[837.0878409090908],"type":"scatter","xaxis":"x2","yaxis":"y2"},{"marker":{"color":"#E67E22"},"name":"Stock Actual","opacity":0.7,"showlegend":false,"x":["BRAZO PULPO"],"y":[51.68],"type":"bar","xaxis":"x2","yaxis":"y2"},{"marker":{"color":"#3498DB","line":{"color":"white","width":2},"size":10,"symbol":"diamond"},"mode":"markers","name":"Promedio Semanal","showlegend":false,"x":["BRAZO PULPO"],"y":[667.2000946969696],"type":"scatter","xaxis":"x2","yaxis":"y2"},{"marker":{"color":"#E67E22"},"name":"Stock Actual","opacity":0.7,"showlegend":false,"x":["LOMO ALMENDRA"],"y":[179.25000000000003],"type":"bar","xaxis":"x2","yaxis":"y2"},{"marker":{"color":"#3498DB","line":{"color":"white","width":2},"size":10,"symbol":"diamond"},"mode":"markers","name":"Promedio Semanal","showlegend":false,"x":["LOMO ALMENDRA"],"y":[778.7857954545455],"type":"scatter","xaxis":"x2","yaxis":"y2"},{"marker":{"color":"#E67E22"},"name":"Stock Actual","opacity":0.7,"showlegend":false,"x":["TOCINO CORRIENTE"],"y":[111.4],"type":"bar","xaxis":"x2","yaxis":"y2"},{"marker":{"color":"#3498DB","line":{"color":"white","width":2},"size":10,"symbol":"diamond"},"mode":"markers","name":"Promedio Semanal","showlegend":false,"x":["TOCINO CORRIENTE"],"y":[687.672840909091],"type":"scatter","xaxis":"x2","yaxis":"y2"},{"marker":{"color":"#E67E22"},"name":"Stock Actual","opacity":0.7,"showlegend":false,"x":["BONDIOLA"],"y":[19.6],"type":"bar","xaxis":"x2","yaxis":"y2"},{"marker":{"color":"#3498DB","line":{"color":"white","width":2},"size":10,"symbol":"diamond"},"mode":"markers","name":"Promedio Semanal","showlegend":false,"x":["BONDIOLA"],"y":[547.175946969697],"type":"scatter","xaxis":"x2","yaxis":"y2"},{"marker":{"color":"#E67E22"},"name":"Stock Actual","opacity":0.7,"showlegend":false,"x":["COSTILLA SAN LUIS"],"y":[180.45000000000002],"type":"bar","xaxis":"x2","yaxis":"y2"},{"marker":{"color":"#3498DB","line":{"color":"white","width":2},"size":10,"symbol":"diamond"},"mode":"markers","name":"Promedio Semanal","showlegend":false,"x":["COSTILLA SAN LUIS"],"y":[688.1233598484848],"type":"scatter","xaxis":"x2","yaxis":"y2"},{"marker":{"color":"#E67E22"},"name":"Stock Actual","opacity":0.7,"showlegend":false,"x":["HUESO POROZO"],"y":[54.8],"type":"bar","xaxis":"x2","yaxis":"y2"},{"marker":{"color":"#3498DB","line":{"color":"white","width":2},"size":10,"symbol":"diamond"},"mode":"markers","name":"Promedio Semanal","showlegend":false,"x":["HUESO POROZO"],"y":[537.013087121212],"type":"scatter","xaxis":"x2","yaxis":"y2"},{"marker":{"color":"#E67E22"},"name":"Stock Actual","opacity":0.7,"showlegend":false,"x":["TOCINO DORSAL"],"y":[68.25],"type":"bar","xaxis":"x2","yaxis":"y2"},{"marker":{"color":"#3498DB","line":{"color":"white","width":2},"size":10,"symbol":"diamond"},"mode":"markers","name":"Promedio Semanal","showlegend":false,"x":["TOCINO DORSAL"],"y":[438.98087121212114],"type":"scatter","xaxis":"x2","yaxis":"y2"},{"marker":{"color":"#E67E22"},"name":"Stock Actual","opacity":0.7,"showlegend":false,"x":["PLANCHA"],"y":[163.84999999999997],"type":"bar","xaxis":"x2","yaxis":"y2"},{"marker":{"color":"#3498DB","line":{"color":"white","width":2},"size":10,"symbol":"diamond"},"mode":"markers","name":"Promedio Semanal","showlegend":false,"x":["PLANCHA"],"y":[532.5131742424242],"type":"scatter","xaxis":"x2","yaxis":"y2"},{"hole":0.4,"labels":["Bajo Promedio","Stock Adecuado"],"marker":{"colors":["#E74C3C","#3498DB"]},"showlegend":false,"textinfo":"percent+label","textposition":"outside","values":[30,25],"type":"pie","domain":{"x":[0.0,0.44],"y":[0.0,0.36]}},{"marker":{"color":"#3498DB"},"name":"N\u00famero de Ventas","showlegend":false,"x":["PLANCHA","LOMO ALMENDRA","CHULETA DE BRAZO","PUNTAS DE COSTILLA","BRAZO PULPO","BONDIOLA","MILANESA CERDO X KILO","COSTILLA SAN LUIS","COSTILLA BABY BACK","CARNE MOLIDA"],"y":{"dtype":"f8","bdata":"AAAAAACIi0AAAAAAAOiJQAAAAAAAKIZAAAAAAAD4hEAAAAAAAPiEQAAAAAAAMINAAAAAAADAgUAAAAAAAHB8QAAAAAAAsHZAAAAAAABQdEA="},"type":"bar","xaxis":"x3","yaxis":"y3"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"xaxis":{"anchor":"y","domain":[0.0,0.44],"tickangle":45,"title":{"text":"Producto"}},"yaxis":{"anchor":"x","domain":[0.64,1.0],"title":{"text":"Cantidad (kg)"}},"xaxis2":{"anchor":"y2","domain":[0.56,1.0],"tickangle":45,"title":{"text":"Producto"}},"yaxis2":{"anchor":"x2","domain":[0.64,1.0],"title":{"text":"Cantidad (kg)"}},"xaxis3":{"anchor":"y3","domain":[0.56,1.0],"tickangle":45,"title":{"text":"Producto"}},"yaxis3":{"anchor":"x3","domain":[0.0,0.36],"title":{"text":"N\u00famero de Ventas"}},"annotations":[{"font":{"size":13},"showarrow":false,"text":"Top 10 Productos con Mayor Sobrestock","x":0.22,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"size":13},"showarrow":false,"text":"Top 10 Productos con Mayor Faltante","x":0.78,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"size":13},"showarrow":false,"text":"Distribuci\u00f3n del Estado de Inventario","x":0.22,"xanchor":"center","xref":"paper","y":0.36,"yanchor":"bottom","yref":"paper"},{"font":{"size":13},"showarrow":false,"text":"Productos con Mayor Rotaci\u00f3n","x":0.78,"xanchor":"center","xref":"paper","y":0.36,"yanchor":"bottom","yref":"paper"}],"title":{"font":{"size":24,"color":"#2C3E50"},"text":"\u003cb\u003eDashboard de Control de Inventario\u003c\u002fb\u003e","x":0.5,"y":0.98,"xanchor":"center","yanchor":"top"},"legend":{"orientation":"h","yanchor":"bottom","y":1.02,"xanchor":"right","x":1},"font":{"family":"Arial","size":12,"color":"#2C3E50"},"margin":{"t":120,"b":60,"l":40,"r":40},"height":1150,"showlegend":true},                        {"responsive": true}                    )                };            </script>        </div>
+</body>
+</html>
+                </div>
+            </div>
+            
+            <!-- Resumen Ejecutivo -->
+            <div class="section">
+                <h2 class="section-title">📋 Resumen Ejecutivo</h2>
+                
+        <div style="font-family:Arial; max-width:1200px; margin:20px auto; padding:20px;">
+            <h2 style="color:#2C3E50; margin-bottom:20px;">Resumen Ejecutivo de Inventario</h2>
+            
+            <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:30px;">
+                <div style="background:white; border-radius:10px; padding:20px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                    <div style="color:#2C3E50; font-size:16px; margin-bottom:10px;">Productos Sin Movimiento</div>
+                    <div style="font-size:24px; font-weight:bold; margin-bottom:5px; color:#F1C40F;">5</div>
+                    <div style="font-size:14px; color:#666;">9.1% del inventario no ha tenido ventas</div>
+                </div>
+                
+                <div style="background:white; border-radius:10px; padding:20px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                    <div style="color:#2C3E50; font-size:16px; margin-bottom:10px;">Productos en Estado Crítico</div>
+                    <div style="font-size:24px; font-weight:bold; margin-bottom:5px; color:#E74C3C;">30</div>
+                    <div style="font-size:14px; color:#666;">54.5% tienen stock bajo el promedio</div>
+                </div>
+                
+                <div style="background:white; border-radius:10px; padding:20px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                    <div style="color:#2C3E50; font-size:16px; margin-bottom:10px;">Stock Total</div>
+                    <div style="font-size:24px; font-weight:bold; margin-bottom:5px; color:#2ECC71;">10,418 kg</div>
+                    <div style="font-size:14px; color:#666;">Distribuido en 55 productos</div>
+                </div>
+            </div>
+            
+            <div style="background:#F8F9FA; border-radius:10px; padding:20px;">
+                <h3 style="color:#2C3E50; margin-bottom:15px;">Recomendaciones Principales</h3>
+                <ul style="color:#555;">
+                    <li><strong>Atención Inmediata:</strong> 10 productos requieren reposición urgente.</li>
+                    <li><strong>Sobrestock:</strong> 10 productos tienen niveles de stock significativamente altos.</li>
+                    <li><strong>Productos Sin Movimiento:</strong> Evaluar estrategias para 5 productos sin ventas recientes.</li>
+                </ul>
+            </div>
+        </div>
+        
+            </div>
+            
+            <!-- Tabla de Productos Críticos -->
+            <div class="section">
+                <h2 class="section-title">⚠️ Productos que Requieren Atención Inmediata</h2>
+                
+        <div style='margin:20px 0;'>
+            <!-- FILTRO POR MACROPIEZA -->
+            <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <label style="font-weight: bold; color: #2C3E50;">🔍 Filtrar por Macropieza:</label>
+                
+                <div style="position: relative;">
+                    <button id="macropiezaFilterBtn" onclick="toggleMacropiezaFilter()" 
+                            style="padding: 10px 15px; border: 2px solid #E74C3C; border-radius: 5px; 
+                                background: white; cursor: pointer; font-size: 14px; min-width: 200px; text-align: left;">
+                        🏷️ Todas las Macropiezas ▼
+                    </button>
+                    
+                    <!-- Dropdown del filtro -->
+                    <div id="macropiezaFilterDropdown" 
+                        style="display: none; position: absolute; top: 100%; left: 0; z-index: 1000; 
+                                background: white; border: 2px solid #E74C3C; border-radius: 5px; 
+                                box-shadow: 0 4px 6px rgba(0,0,0,0.1); min-width: 300px; max-height: 350px; 
+                                overflow-y: auto; margin-top: 5px;">
+                        
+                        <!-- Buscador dentro del dropdown -->
+                        <div style="padding: 10px; border-bottom: 1px solid #ddd; background: #ffe6e6;">
+                            <input type="text" id="macropiezaSearchFilter" placeholder="Buscar macropieza..." 
+                                onkeyup="filterMacropiezaList()" 
+                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+                        </div>
+                        
+                        <!-- Checkbox "Seleccionar todo" -->
+                        <div style="padding: 10px; border-bottom: 1px solid #ddd; background: #fff5f5;">
+                            <label style="cursor: pointer; font-weight: bold;">
+                                <input type="checkbox" id="selectAllMacropiezas" onclick="toggleAllMacropiezas()" checked> 
+                                (Seleccionar todas)
+                            </label>
+                        </div>
+                        
+                        <!-- Lista de checkboxes -->
+                        <div id="macropiezaCheckboxList" style="padding: 10px;">
+        
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Berijas" value="Berijas" checked onchange="updateMacropiezaSelectAll()">
+                                    Berijas
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Brazo_con_hueso" value="Brazo con hueso" checked onchange="updateMacropiezaSelectAll()">
+                                    Brazo con hueso
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Brazo_sin_hueso" value="Brazo sin hueso" checked onchange="updateMacropiezaSelectAll()">
+                                    Brazo sin hueso
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Cabeza" value="Cabeza" checked onchange="updateMacropiezaSelectAll()">
+                                    Cabeza
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Cabeza_de_Lomo" value="Cabeza de Lomo" checked onchange="updateMacropiezaSelectAll()">
+                                    Cabeza de Lomo
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Costilla" value="Costilla" checked onchange="updateMacropiezaSelectAll()">
+                                    Costilla
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Despalme" value="Despalme" checked onchange="updateMacropiezaSelectAll()">
+                                    Despalme
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Embutidos" value="Embutidos" checked onchange="updateMacropiezaSelectAll()">
+                                    Embutidos
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Empella" value="Empella" checked onchange="updateMacropiezaSelectAll()">
+                                    Empella
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Espinazo" value="Espinazo" checked onchange="updateMacropiezaSelectAll()">
+                                    Espinazo
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Falda" value="Falda" checked onchange="updateMacropiezaSelectAll()">
+                                    Falda
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Hueso" value="Hueso" checked onchange="updateMacropiezaSelectAll()">
+                                    Hueso
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Hueso_poroso" value="Hueso poroso" checked onchange="updateMacropiezaSelectAll()">
+                                    Hueso poroso
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Lomo" value="Lomo" checked onchange="updateMacropiezaSelectAll()">
+                                    Lomo
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Panceta" value="Panceta" checked onchange="updateMacropiezaSelectAll()">
+                                    Panceta
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Papada" value="Papada" checked onchange="updateMacropiezaSelectAll()">
+                                    Papada
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Pernil_SIN_Hueso" value="Pernil SIN Hueso" checked onchange="updateMacropiezaSelectAll()">
+                                    Pernil SIN Hueso
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Pernil_con_Hueso" value="Pernil con Hueso" checked onchange="updateMacropiezaSelectAll()">
+                                    Pernil con Hueso
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Pezuñas" value="Pezuñas" checked onchange="updateMacropiezaSelectAll()">
+                                    Pezuñas
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Puntas_de_costilla" value="Puntas de costilla" checked onchange="updateMacropiezaSelectAll()">
+                                    Puntas de costilla
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Recortes_industriales" value="Recortes industriales" checked onchange="updateMacropiezaSelectAll()">
+                                    Recortes industriales
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Tocino_Barriga" value="Tocino Barriga" checked onchange="updateMacropiezaSelectAll()">
+                                    Tocino Barriga
+                                </label>
+                            </div>
+            
+                            <div class="macropieza-checkbox-item" style="margin-bottom: 5px;">
+                                <label style="cursor: pointer;">
+                                    <input type="checkbox" id="macro_Tocino_Cte" value="Tocino Cte" checked onchange="updateMacropiezaSelectAll()">
+                                    Tocino Cte
+                                </label>
+                            </div>
+            
+                        </div>
+                        
+                        <!-- Botones de acción -->
+                        <div style="padding: 10px; border-top: 1px solid #ddd; display: flex; gap: 10px; justify-content: flex-end; background: #fff5f5;">
+                            <button onclick="clearMacropiezaFilter()" 
+                                    style="padding: 8px 15px; background: #95A5A6; color: white; 
+                                        border: none; border-radius: 3px; cursor: pointer;">
+                                Limpiar
+                            </button>
+                            <button onclick="applyMacropiezaFilter()" 
+                                    style="padding: 8px 15px; background: #E74C3C; color: white; 
+                                        border: none; border-radius: 3px; cursor: pointer; font-weight: bold;">
+                                Aplicar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <span id="macropiezaFilterStatus" style="color: #666; font-size: 14px;"></span>
+            </div>
+            
+            <!-- TABLA -->
+            <div style='overflow-x:auto;'>
+                <table id="criticosTable" style='width:100%; border-collapse:collapse; box-shadow:0 2px 4px rgba(0,0,0,0.1);'>
+                    <thead>
+                        <tr style='background-color:#E74C3C; color:white;'>
+                            <th style='padding:12px; text-align:left; border:1px solid #ddd;'>Macropieza</th>
+                            <th style='padding:12px; text-align:left; border:1px solid #ddd;'>Producto</th>
+                            <th style='padding:12px; text-align:right; border:1px solid #ddd;'>Stock Actual</th>
+                            <th style='padding:12px; text-align:right; border:1px solid #ddd;'>Promedio Semanal</th>
+                            <th style='padding:12px; text-align:right; border:1px solid #ddd;'>Déficit</th>
+                            <th style='padding:12px; text-align:right; border:1px solid #ddd;'>Num. Ventas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                        <tr style='background-color:#ffe6e6;' class="critico-row" data-macropieza="Pernil SIN Hueso">
+                            <td style='padding:10px; border:1px solid #ddd; font-weight:500;'>Pernil SIN Hueso</td>
+                            <td style='padding:10px; border:1px solid #ddd;'>MILANESA DE PIERNA</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd; font-weight:bold;'>689.65 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd;'>3248.35 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd; color:#d62728; font-weight:bold;'>2558.70 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd;'>268</td>
+                        </tr>
+            
+                        <tr style='background-color:#ffe6e6;' class="critico-row" data-macropieza="Cabeza">
+                            <td style='padding:10px; border:1px solid #ddd; font-weight:500;'>Cabeza</td>
+                            <td style='padding:10px; border:1px solid #ddd;'>CABEZA</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd; font-weight:bold;'>211.80 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd;'>837.09 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd; color:#d62728; font-weight:bold;'>625.29 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd;'>180</td>
+                        </tr>
+            
+                        <tr style='background-color:#ffe6e6;' class="critico-row" data-macropieza="Brazo sin hueso">
+                            <td style='padding:10px; border:1px solid #ddd; font-weight:500;'>Brazo sin hueso</td>
+                            <td style='padding:10px; border:1px solid #ddd;'>BRAZO PULPO</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd; font-weight:bold;'>51.68 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd;'>667.20 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd; color:#d62728; font-weight:bold;'>615.52 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd;'>671</td>
+                        </tr>
+            
+                        <tr style='background-color:#ffe6e6;' class="critico-row" data-macropieza="Lomo">
+                            <td style='padding:10px; border:1px solid #ddd; font-weight:500;'>Lomo</td>
+                            <td style='padding:10px; border:1px solid #ddd;'>LOMO ALMENDRA</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd; font-weight:bold;'>179.25 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd;'>778.79 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd; color:#d62728; font-weight:bold;'>599.54 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd;'>829</td>
+                        </tr>
+            
+                        <tr style='background-color:#ffe6e6;' class="critico-row" data-macropieza="Tocino Cte">
+                            <td style='padding:10px; border:1px solid #ddd; font-weight:500;'>Tocino Cte</td>
+                            <td style='padding:10px; border:1px solid #ddd;'>TOCINO CORRIENTE</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd; font-weight:bold;'>111.40 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd;'>687.67 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd; color:#d62728; font-weight:bold;'>576.27 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd;'>233</td>
+                        </tr>
+            
+                        <tr style='background-color:#ffe6e6;' class="critico-row" data-macropieza="Cabeza de Lomo">
+                            <td style='padding:10px; border:1px solid #ddd; font-weight:500;'>Cabeza de Lomo</td>
+                            <td style='padding:10px; border:1px solid #ddd;'>BONDIOLA</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd; font-weight:bold;'>19.60 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd;'>547.18 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd; color:#d62728; font-weight:bold;'>527.58 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd;'>614</td>
+                        </tr>
+            
+                        <tr style='background-color:#ffe6e6;' class="critico-row" data-macropieza="Costilla">
+                            <td style='padding:10px; border:1px solid #ddd; font-weight:500;'>Costilla</td>
+                            <td style='padding:10px; border:1px solid #ddd;'>COSTILLA SAN LUIS</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd; font-weight:bold;'>180.45 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd;'>688.12 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd; color:#d62728; font-weight:bold;'>507.67 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd;'>455</td>
+                        </tr>
+            
+                        <tr style='background-color:#ffe6e6;' class="critico-row" data-macropieza="Hueso poroso">
+                            <td style='padding:10px; border:1px solid #ddd; font-weight:500;'>Hueso poroso</td>
+                            <td style='padding:10px; border:1px solid #ddd;'>HUESO POROZO</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd; font-weight:bold;'>54.80 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd;'>537.01 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd; color:#d62728; font-weight:bold;'>482.21 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd;'>156</td>
+                        </tr>
+            
+                        <tr style='background-color:#ffe6e6;' class="critico-row" data-macropieza="Tocino Cte">
+                            <td style='padding:10px; border:1px solid #ddd; font-weight:500;'>Tocino Cte</td>
+                            <td style='padding:10px; border:1px solid #ddd;'>TOCINO DORSAL</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd; font-weight:bold;'>68.25 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd;'>438.98 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd; color:#d62728; font-weight:bold;'>370.73 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd;'>104</td>
+                        </tr>
+            
+                        <tr style='background-color:#ffe6e6;' class="critico-row" data-macropieza="Panceta">
+                            <td style='padding:10px; border:1px solid #ddd; font-weight:500;'>Panceta</td>
+                            <td style='padding:10px; border:1px solid #ddd;'>PLANCHA</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd; font-weight:bold;'>163.85 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd;'>532.51 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd; color:#d62728; font-weight:bold;'>368.66 kg</td>
+                            <td style='padding:10px; text-align:right; border:1px solid #ddd;'>881</td>
+                        </tr>
+            
+                    </tbody>
+                </table>
+            </div>
+            
+            <div style="margin-top: 15px; text-align: center; color: #666;">
+                <span id="criticosCount">Mostrando 10 productos críticos</span>
+            </div>
+        </div>
+        
+        <script>
+        // Variables globales para filtro de Macropieza
+        let selectedMacropiezas = new Set();
+        let allMacropiezas = [];
+        
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            initMacropiezaFilter();
+        });
+        
+        function initMacropiezaFilter() {
+            const checkboxes = document.querySelectorAll('#macropiezaCheckboxList input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                allMacropiezas.push(cb.value);
+                selectedMacropiezas.add(cb.value);
+            });
+        }
+        
+        function toggleMacropiezaFilter() {
+            const dropdown = document.getElementById('macropiezaFilterDropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Cerrar dropdown al hacer click fuera
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('macropiezaFilterDropdown');
+            const button = document.getElementById('macropiezaFilterBtn');
+            
+            if (!dropdown.contains(event.target) && event.target !== button) {
+                dropdown.style.display = 'none';
+            }
+        });
+        
+        function filterMacropiezaList() {
+            const searchValue = document.getElementById('macropiezaSearchFilter').value.toUpperCase();
+            const items = document.getElementsByClassName('macropieza-checkbox-item');
+            
+            for (let i = 0; i < items.length; i++) {
+                const text = items[i].textContent || items[i].innerText;
+                items[i].style.display = text.toUpperCase().indexOf(searchValue) > -1 ? '' : 'none';
+            }
+        }
+        
+        function toggleAllMacropiezas() {
+            const selectAll = document.getElementById('selectAllMacropiezas');
+            const checkboxes = document.querySelectorAll('#macropiezaCheckboxList input[type="checkbox"]');
+            
+            checkboxes.forEach(cb => {
+                if (cb.parentElement.parentElement.style.display !== 'none') {
+                    cb.checked = selectAll.checked;
+                }
+            });
+        }
+        
+        function updateMacropiezaSelectAll() {
+            const checkboxes = document.querySelectorAll('#macropiezaCheckboxList input[type="checkbox"]');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            document.getElementById('selectAllMacropiezas').checked = allChecked;
+        }
+        
+        function clearMacropiezaFilter() {
+            const checkboxes = document.querySelectorAll('#macropiezaCheckboxList input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = true);
+            document.getElementById('selectAllMacropiezas').checked = true;
+            selectedMacropiezas = new Set(allMacropiezas);
+            applyMacropiezaFilter();
+        }
+        
+        function applyMacropiezaFilter() {
+            selectedMacropiezas.clear();
+            const checkboxes = document.querySelectorAll('#macropiezaCheckboxList input[type="checkbox"]:checked');
+            checkboxes.forEach(cb => selectedMacropiezas.add(cb.value));
+            
+            // Actualizar botón
+            const button = document.getElementById('macropiezaFilterBtn');
+            if (selectedMacropiezas.size === allMacropiezas.length) {
+                button.textContent = '🏷️ Todas las Macropiezas ▼';
+            } else {
+                button.textContent = `🏷️ Macropiezas (${selectedMacropiezas.size}) ▼`;
+            }
+            
+            // Filtrar tabla
+            const rows = document.querySelectorAll('.critico-row');
+            let visibleCount = 0;
+            
+            rows.forEach(row => {
+                const macropieza = row.getAttribute('data-macropieza');
+                if (selectedMacropiezas.has(macropieza)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Actualizar contador
+            document.getElementById('criticosCount').textContent = `Mostrando ${visibleCount} productos críticos`;
+            
+            // Cerrar dropdown
+            document.getElementById('macropiezaFilterDropdown').style.display = 'none';
+        }
+        </script>
+        
+            </div>
+            
+            <!-- NUEVA SECCIÓN: Tabla Inventario Completo -->
+            <div class="section">
+                <h2 class="section-title">📦 Inventario Completo Detallado</h2>
+                
+        <div style="margin: 30px 0; font-family: Arial, sans-serif;">
+            <div style="background: white; border-radius: 10px; padding: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                
+                <!-- BARRA DE FILTROS -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                    <h2 style="color: #2C3E50; margin: 0;">📋 Inventario Completo</h2>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        
+                        <!-- Buscador de texto -->
+                        <input type="text" id="searchInput" placeholder="🔍 Buscar producto..." 
+                               style="padding: 10px; border: 2px solid #ddd; border-radius: 5px; width: 250px; font-size: 14px;">
+                        
+                        <!-- Filtro multiselección de productos -->
+                        <div style="position: relative;">
+                            <button id="productFilterBtn" onclick="toggleProductFilter()" 
+                                    style="padding: 10px 15px; border: 2px solid #ddd; border-radius: 5px; 
+                                           background: white; cursor: pointer; font-size: 14px; min-width: 200px; text-align: left;">
+                                🏷️ Filtrar por Producto ▼
+                            </button>
+                            
+                            <!-- Dropdown del filtro -->
+                            <div id="productFilterDropdown" 
+                                 style="display: none; position: absolute; top: 100%; left: 0; z-index: 1000; 
+                                        background: white; border: 2px solid #ddd; border-radius: 5px; 
+                                        box-shadow: 0 4px 6px rgba(0,0,0,0.1); min-width: 300px; max-height: 400px; 
+                                        overflow-y: auto; margin-top: 5px;">
+                                
+                                <!-- Buscador dentro del dropdown -->
+                                <div style="padding: 10px; border-bottom: 1px solid #ddd; background: #f8f9fa;">
+                                    <input type="text" id="productSearchFilter" placeholder="Buscar en lista..." 
+                                           onkeyup="filterProductList()" 
+                                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+                                </div>
+                                
+                                <!-- Checkbox "Seleccionar todo" -->
+                                <div style="padding: 10px; border-bottom: 1px solid #ddd;">
+                                    <label style="cursor: pointer; font-weight: bold;">
+                                        <input type="checkbox" id="selectAllProducts" onclick="toggleAllProducts()" checked> 
+                                        (Seleccionar todo)
+                                    </label>
+                                </div>
+                                
+                                <!-- Lista de checkboxes (se llena dinámicamente) -->
+                                <div id="productCheckboxList" style="padding: 10px;">
+                                    <!-- JavaScript llenará esto -->
+                                </div>
+                                
+                                <!-- Botones de acción -->
+                                <div style="padding: 10px; border-top: 1px solid #ddd; display: flex; gap: 10px; justify-content: flex-end;">
+                                    <button onclick="clearProductFilter()" 
+                                            style="padding: 8px 15px; background: #E74C3C; color: white; 
+                                                   border: none; border-radius: 3px; cursor: pointer;">
+                                        Limpiar
+                                    </button>
+                                    <button onclick="applyProductFilter()" 
+                                            style="padding: 8px 15px; background: #2ECC71; color: white; 
+                                                   border: none; border-radius: 3px; cursor: pointer; font-weight: bold;">
+                                        Aplicar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Filtro de estado -->
+                        <select id="estadoFilter" style="padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 14px;">
+                            <option value="">📊 Todos los estados</option>
+                            <option value="Stock Adecuado">✅ Stock Adecuado</option>
+                            <option value="Bajo Promedio">⚠️ Bajo Promedio</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- TABLA -->
+                <div style="overflow-x: auto;">
+                    <table id="inventarioTable" style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                        <thead>
+                            <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                <th onclick="sortTable(0)" style="padding: 15px; text-align: left; cursor: pointer; user-select: none; border: 1px solid #ddd;">
+                                    Código ⬍
+                                </th>
+                                <th onclick="sortTable(1)" style="padding: 15px; text-align: left; cursor: pointer; user-select: none; border: 1px solid #ddd;">
+                                    Producto ⬍
+                                </th>
+                                <th onclick="sortTable(2)" style="padding: 15px; text-align: right; cursor: pointer; user-select: none; border: 1px solid #ddd;">
+                                    Stock Actual (kg) ⬍
+                                </th>
+        
+                                <th onclick="sortTable(3)" style="padding: 15px; text-align: right; cursor: pointer; user-select: none; border: 1px solid #ddd;">
+                                    Promedio Semanal (kg) ⬍
+                                </th>
+                                <th onclick="sortTable(4)" style="padding: 15px; text-align: center; cursor: pointer; user-select: none; border: 1px solid #ddd;">
+                                    ⏱️ Semanas Stock ⬍
+                                </th>
+                                <th onclick="sortTable(5)" style="padding: 15px; text-align: right; cursor: pointer; user-select: none; border: 1px solid #ddd;">
+                                    Diferencia (kg) ⬍
+                                </th>
+                                <th onclick="sortTable(6)" style="padding: 15px; text-align: right; cursor: pointer; user-select: none; border: 1px solid #ddd;">
+                                    Num. Ventas ⬍
+                                </th>
+                                <th onclick="sortTable(7)" style="padding: 15px; text-align: center; cursor: pointer; user-select: none; border: 1px solid #ddd;">
+                                    Estado ⬍
+                                </th>
+            
+                            </tr>
+                        </thead>
+                        <tbody>
+        
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">365</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">ASERRIN</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">156.60</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">35.11</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">✅ 4.5 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">121.49</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">20</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">364</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">BERIJAS</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">148.15</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">175.57</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.8 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-27.42</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">92</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">303</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">BONDIOLA</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">19.60</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">547.18</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.0 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-527.58</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">614</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">362</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">BONDIOLA TAJADA</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">176.60</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">337.85</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.5 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-161.25</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">150</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">333</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">BRAZO DESPOSTE </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">210.00</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">0.00</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #95A5A6; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">∞ Sin datos</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">210.00</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">0</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">304</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">BRAZO PULPO</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">51.68</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">667.20</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.1 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-615.52</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">671</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">251</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">CABEZA</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">211.80</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">837.09</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.3 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-625.29</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">180</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">307</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">CABEZA DE LOMO</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">761.80</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">214.10</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">✅ 3.6 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">547.70</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">244</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">51</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">CANASTO</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">45.90</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">84.19</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.5 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-38.29</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">58</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">305</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">CARNE MOLIDA</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">10.20</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">120.22</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.1 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-110.02</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">325</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">68</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">CARTILAGOS </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">6.45</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">0.00</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #95A5A6; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">∞ Sin datos</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">6.45</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">0</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">367</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">CHICHARRON CARNUDO X KG</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">133.10</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">238.66</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.6 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-105.56</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">282</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">501</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">CHORIZO SANTAROSANO X500</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">9.00</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">3.49</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">✅ 2.6 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">5.51</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">70</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">6</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">CHULETA DE BRAZO</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">560.80</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">191.54</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">✅ 2.9 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">369.26</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">709</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">4</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">CHULETA DE COGOTE</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">113.55</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">9.65</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">✅ 11.8 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">103.90</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">32</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">9</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">CHULETA DE LOMO</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">80.30</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">13.92</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">✅ 5.8 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">66.38</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">41</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">72</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">CHULETON</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">15.70</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">13.92</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #F39C12; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">⚠️ 1.1 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">1.78</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">33</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">202</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">CODOS CON PIEL</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">60.30</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">97.81</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.6 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-37.51</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">114</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">102</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">COJINES</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">19.45</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">34.00</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.6 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-14.55</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">61</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">264</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">COLAS Y COGOTES</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">24.80</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">161.29</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.2 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-136.49</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">112</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">52</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">COSTILLA BABY BACK</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">436.55</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">238.45</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #F39C12; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">⚠️ 1.8 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">198.10</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">363</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">325</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">COSTILLA INDUSTRIAL</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">190.85</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">11.50</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">✅ 16.6 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">179.35</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">13</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">64</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">COSTILLA MOSTRADOR</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">9.10</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">4.29</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">✅ 2.1 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">4.81</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">4</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">55</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">COSTILLA SAN LUIS</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">180.45</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">688.12</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.3 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-507.67</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">455</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">58</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">COSTIPIEL</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">75.70</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">-0.27</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 -277.5 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">75.97</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">1</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">512</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">Chorizo Ahumado x19 Unds</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">471.00</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">103.97</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">✅ 4.5 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">367.03</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">214</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">270</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">DECOMISO</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">86.15</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">32.59</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">✅ 2.6 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">53.56</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">13</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">253</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">DESPALME</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">264.90</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">379.48</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.7 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-114.58</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">184</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">268</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">EMPELLA</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">198.35</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">162.84</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #F39C12; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">⚠️ 1.2 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">35.51</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">128</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">153</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">ESPINAZO ESPECIAL</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">13.70</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">15.75</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.9 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-2.05</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">110</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">311</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">FALDA</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">70.75</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">17.53</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">✅ 4.0 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">53.22</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">28</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">322</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">GOULASH ESPECIAL</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">267.25</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">83.89</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">✅ 3.2 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">183.36</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">224</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">254</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">HUESO POROZO</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">54.80</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">537.01</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.1 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-482.21</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">156</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">315</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">LOMO ALMENDRA</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">179.25</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">778.79</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.2 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-599.54</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">829</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">320</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">LOMO DESPOSTE </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">13.60</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">0.00</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #95A5A6; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">∞ Sin datos</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">13.60</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">0</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">314</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">MILANESA CERDO X KILO</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">282.75</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">252.49</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #F39C12; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">⚠️ 1.1 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">30.26</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">568</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">316</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">MILANESA DE PIERNA</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">689.65</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">3248.35</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.2 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-2558.70</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">268</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">204</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">OSOBUCOS</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">35.45</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">12.79</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">✅ 2.8 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">22.66</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">46</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">353</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">PAPADA CON PIEL</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">64.70</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">275.14</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.2 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-210.44</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">220</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">328</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">PERNIL DESPOSTE </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">507.25</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">0.00</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #95A5A6; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">∞ Sin datos</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">507.25</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">0</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">208</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">PEZUÑA</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">32.40</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">263.46</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.1 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-231.06</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">305</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">358</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">PLANCHA</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">163.85</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">532.51</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.3 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-368.66</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">881</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">71</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">PUNTAS DE COSTILLA</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">1180.65</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">475.76</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">✅ 2.5 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">704.89</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">671</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">61</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">RACK DE COSTILLA</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">34.10</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">49.91</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.7 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-15.81</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">36</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">259</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">RECORTE DE CHULETA</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">11.70</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">0.00</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #95A5A6; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">∞ Sin datos</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">11.70</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">0</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">256</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">RECORTE ESPECIAL</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">870.65</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">955.92</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.9 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-85.27</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">262</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">280</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">Recorte De Pierna</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">462.35</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">702.24</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.7 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-239.89</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">145</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">258</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">SANGRADOS</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">41.15</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">109.05</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.4 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-67.90</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">75</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #e6f7e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">313</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">SOLOMITO</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">181.40</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">130.68</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #F39C12; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">⚠️ 1.4 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #2ca02c; font-weight: bold;">50.72</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">128</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #2ECC71; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Stock Adecuado
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">360</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">TOCINETA ANTIOQUEÑA</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">75.55</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">219.71</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.3 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-144.16</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">135</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">355</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">TOCINO BARRIGA</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">245.60</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">537.57</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.5 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-291.97</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">165</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">356</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">TOCINO CORRIENTE</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">111.40</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">687.67</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.2 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-576.27</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">233</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">357</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">TOCINO DORSAL</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">68.25</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">438.98</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.2 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-370.73</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">104</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">352</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">TOCINO PIANO CON PIEL</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">20.10</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">76.30</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.3 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-56.20</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">96</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                            <tr style="background-color: #ffe6e6; border-bottom: 1px solid #ddd;" class="table-row">
+                                <td style="padding: 12px; border: 1px solid #ddd;">359</td>
+                                <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">TOCINO PIANO SIN PIEL</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold;">10.85</td>
+            
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">145.53</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">🚨 0.1 sem</span>
+                                </td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #d62728; font-weight: bold;">-134.68</td>
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">150</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <span style="background: #E74C3C; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        Bajo Promedio
+                                    </span>
+                                </td>
+                
+                            </tr>
+            
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- CONTADOR -->
+                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px; text-align: center; color: #666;">
+                    <span id="rowCount">Total: 55 productos</span> | 
+                    <span id="filteredCount"></span>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+        // Variables globales
+        let allProducts = [];
+        let selectedProducts = new Set();
+
+        // Inicializar cuando cargue la página
+        document.addEventListener('DOMContentLoaded', function() {
+            initProductFilter();
+        });
+
+        // Inicializar filtro de productos
+        function initProductFilter() {
+            const table = document.getElementById('inventarioTable');
+            const rows = table.getElementsByTagName('tr');
+            
+            for (let i = 1; i < rows.length; i++) {
+                const productCell = rows[i].getElementsByTagName('td')[1];
+                if (productCell) {
+                    const productName = productCell.textContent.trim();
+                    if (!allProducts.includes(productName)) {
+                        allProducts.push(productName);
+                        selectedProducts.add(productName);
+                    }
+                }
+            }
+            
+            allProducts.sort();
+            renderProductCheckboxes();
+        }
+
+        function renderProductCheckboxes() {
+            const container = document.getElementById('productCheckboxList');
+            container.innerHTML = '';
+            
+            allProducts.forEach(product => {
+                const div = document.createElement('div');
+                div.className = 'product-checkbox-item';
+                div.style.marginBottom = '5px';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = product;
+                checkbox.id = 'product_' + product.replace(/[^a-zA-Z0-9]/g, '_');
+                checkbox.checked = selectedProducts.has(product);
+                checkbox.onchange = updateSelectAllCheckbox;
+                
+                const label = document.createElement('label');
+                label.htmlFor = checkbox.id;
+                label.textContent = ' ' + product;
+                label.style.cursor = 'pointer';
+                
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                container.appendChild(div);
+            });
+        }
+
+        function filterProductList() {
+            const searchValue = document.getElementById('productSearchFilter').value.toUpperCase();
+            const items = document.getElementsByClassName('product-checkbox-item');
+            
+            for (let i = 0; i < items.length; i++) {
+                const label = items[i].getElementsByTagName('label')[0];
+                const text = label.textContent || label.innerText;
+                items[i].style.display = text.toUpperCase().indexOf(searchValue) > -1 ? '' : 'none';
+            }
+        }
+
+        function toggleProductFilter() {
+            const dropdown = document.getElementById('productFilterDropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('productFilterDropdown');
+            const button = document.getElementById('productFilterBtn');
+            
+            if (!dropdown.contains(event.target) && event.target !== button) {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        function toggleAllProducts() {
+            const selectAll = document.getElementById('selectAllProducts');
+            const checkboxes = document.querySelectorAll('#productCheckboxList input[type="checkbox"]');
+            
+            checkboxes.forEach(cb => {
+                if (cb.parentElement.style.display !== 'none') {
+                    cb.checked = selectAll.checked;
+                }
+            });
+        }
+
+        function updateSelectAllCheckbox() {
+            const checkboxes = document.querySelectorAll('#productCheckboxList input[type="checkbox"]');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            document.getElementById('selectAllProducts').checked = allChecked;
+        }
+
+        function clearProductFilter() {
+            const checkboxes = document.querySelectorAll('#productCheckboxList input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = true);
+            document.getElementById('selectAllProducts').checked = true;
+            selectedProducts = new Set(allProducts);
+            applyProductFilter();
+        }
+
+        function applyProductFilter() {
+            selectedProducts.clear();
+            const checkboxes = document.querySelectorAll('#productCheckboxList input[type="checkbox"]:checked');
+            checkboxes.forEach(cb => selectedProducts.add(cb.value));
+            
+            const button = document.getElementById('productFilterBtn');
+            if (selectedProducts.size === allProducts.length) {
+                button.textContent = '🏷️ Filtrar por Producto ▼';
+            } else {
+                button.textContent = `🏷️ Productos (${selectedProducts.size}) ▼`;
+            }
+            
+            filterTable();
+            document.getElementById('productFilterDropdown').style.display = 'none';
+        }
+
+        document.getElementById('searchInput').addEventListener('keyup', filterTable);
+        document.getElementById('estadoFilter').addEventListener('change', filterTable);
+
+        function filterTable() {
+            const searchValue = document.getElementById('searchInput').value.toUpperCase();
+            const estadoValue = document.getElementById('estadoFilter').value;
+            const table = document.getElementById('inventarioTable');
+            const tr = table.getElementsByTagName('tr');
+            let visibleCount = 0;
+            
+            for (let i = 1; i < tr.length; i++) {
+                const tdProducto = tr[i].getElementsByTagName('td')[1];
+                const tdEstado = tr[i].getElementsByTagName('td')[tr[i].getElementsByTagName('td').length - 1];
+                
+                if (tdProducto && tdEstado) {
+                    const productoText = tdProducto.textContent || tdProducto.innerText;
+                    const estadoText = tdEstado.textContent || tdEstado.innerText;
+                    
+                    const matchSearch = productoText.toUpperCase().indexOf(searchValue) > -1;
+                    const matchEstado = estadoValue === '' || estadoText.indexOf(estadoValue) > -1;
+                    const matchProduct = selectedProducts.has(productoText.trim());
+                    
+                    if (matchSearch && matchEstado && matchProduct) {
+                        tr[i].style.display = '';
+                        visibleCount++;
+                    } else {
+                        tr[i].style.display = 'none';
+                    }
+                }
+            }
+            
+            document.getElementById('filteredCount').textContent = 
+                visibleCount !== 55 ? `Mostrando: ${visibleCount} productos` : '';
+        }
+
+        function sortTable(columnIndex) {
+            const table = document.getElementById('inventarioTable');
+            let switching = true;
+            let shouldSwitch, i;
+            let dir = 'asc';
+            let switchcount = 0;
+            
+            while (switching) {
+                switching = false;
+                const rows = table.rows;
+                
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    const x = rows[i].getElementsByTagName('TD')[columnIndex];
+                    const y = rows[i + 1].getElementsByTagName('TD')[columnIndex];
+                    
+                    let xContent = x.textContent || x.innerText;
+                    let yContent = y.textContent || y.innerText;
+                    
+                    const xNum = parseFloat(xContent.replace(/[^0-9.-]/g, ''));
+                    const yNum = parseFloat(yContent.replace(/[^0-9.-]/g, ''));
+                    
+                    if (!isNaN(xNum) && !isNaN(yNum)) {
+                        xContent = xNum;
+                        yContent = yNum;
+                    }
+                    
+                    if (dir === 'asc') {
+                        if (xContent > yContent) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir === 'desc') {
+                        if (xContent < yContent) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount++;
+                } else {
+                    if (switchcount === 0 && dir === 'asc') {
+                        dir = 'desc';
+                        switching = true;
+                    }
+                }
+            }
+        }
+        </script>
+        
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Dashboard generado automáticamente con Python</strong></p>
+            <p style="margin-top: 10px; font-size: 0.9em;">Sistema de Gestión de Inventario - Inversiones Agropecuarias Lom SAS</p>
+            <p style="margin-top: 5px; font-size: 0.85em; color: #999;">
+                Desarrollado por el equipo de Data Science de Grupo Lom
+            </p>
+        </div>
+    </div>
+</body>
+</html>
