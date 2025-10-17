@@ -3,9 +3,7 @@ name: 📊 Update Dashboard Lomarosa
 on:
   repository_dispatch:
     types: [sharepoint_update]
-  
   workflow_dispatch:
-  
   push:
     branches: [main]
     paths:
@@ -40,62 +38,49 @@ jobs:
           mkdir -p data output
           echo "✅ Directorios creados"
       
-      # ← NUEVO PASO: Descargar archivos de OneDrive
       - name: 📥 Download files from OneDrive
         run: |
           echo "📥 Descargando archivos desde OneDrive..."
           
-          # Descargar inventario
           if [ -n "${{ secrets.ONEDRIVE_INVENTARIO_URL }}" ]; then
             echo "Descargando INVENTARIO_LOMAROSA.xlsx..."
             curl -L "${{ secrets.ONEDRIVE_INVENTARIO_URL }}" -o data/INVENTARIO_LOMAROSA.xlsx
-            echo "✅ Inventario descargado"
+            echo "✅ Inventario descargado: $(du -h data/INVENTARIO_LOMAROSA.xlsx | cut -f1)"
           else
-            echo "⚠️ ONEDRIVE_INVENTARIO_URL no configurado, usando archivos locales"
+            echo "⚠️ ONEDRIVE_INVENTARIO_URL no configurado"
           fi
           
-          # Descargar consolidado
           if [ -n "${{ secrets.ONEDRIVE_CONSOLIDADO_URL }}" ]; then
             echo "Descargando consolidado.xlsx..."
             curl -L "${{ secrets.ONEDRIVE_CONSOLIDADO_URL }}" -o data/consolidado.xlsx
-            echo "✅ Consolidado descargado"
+            echo "✅ Consolidado descargado: $(du -h data/consolidado.xlsx | cut -f1)"
           else
-            echo "⚠️ ONEDRIVE_CONSOLIDADO_URL no configurado, usando archivos locales"
+            echo "⚠️ ONEDRIVE_CONSOLIDADO_URL no configurado"
           fi
           
+          echo ""
           echo "📂 Contenido de data/:"
           ls -lah data/
       
       - name: 🔍 Verify environment
         run: |
-          echo "Python version: $(python --version)"
-          echo "Current directory: $(pwd)"
-          echo "Files in repo:"
-          ls -la
+          echo "Python: $(python --version)"
+          echo "Directory: $(pwd)"
           echo ""
           echo "Files in data/:"
-          ls -la data/ || echo "⚠️ Carpeta data/ vacía o no existe"
+          ls -la data/
       
       - name: 📊 Generate dashboard
-        run: |
-          python src/main.py
+        run: python src/main.py
         env:
           GITHUB_ACTIONS: 'true'
       
       - name: ✅ Verify output
         run: |
-          echo "=== Archivos generados en output/ ==="
-          if [ -d "output" ]; then
-            ls -lah output/
-            if [ -f "output/index.html" ]; then
-              echo "✅ Dashboard HTML generado correctamente"
-              echo "Tamaño: $(du -h output/index.html | cut -f1)"
-            else
-              echo "❌ No se encontró output/index.html"
-              exit 1
-            fi
+          if [ -f "output/index.html" ]; then
+            echo "✅ Dashboard generado: $(du -h output/index.html | cut -f1)"
           else
-            echo "❌ Carpeta output/ no existe"
+            echo "❌ Dashboard no generado"
             exit 1
           fi
       
@@ -107,12 +92,12 @@ jobs:
           publish_branch: gh-pages
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
-          commit_message: '🔄 Update dashboard - ${{ github.event.head_commit.message }}'
-          
-      - name: 🎉 Success notification
+          commit_message: '🔄 Update dashboard'
+      
+      - name: 🎉 Success
         if: success()
         run: |
           echo "=========================================="
-          echo "✅ Dashboard actualizado exitosamente!"
-          echo "🌐 URL: https://grupolom.github.io/lomarosa-data/"
+          echo "✅ Dashboard actualizado!"
+          echo "🌐 https://grupolom.github.io/lomarosa-data/"
           echo "=========================================="
