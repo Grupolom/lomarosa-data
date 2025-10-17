@@ -133,7 +133,7 @@
         <div class="header">
             <h1>📊 Dashboard de Inventario - Lomarosa</h1>
             <p class="company-name">Inversiones Agropecuarias Lom SAS</p>
-            <div class="update-info">🕒 Última actualización: 2025-10-16 20:05:16</div>
+            <div class="update-info">🕒 Última actualización: 2025-10-16 21:16:31</div>
         </div>
         
         <!-- Content -->
@@ -188,18 +188,58 @@
             <h2 style="color:#2C3E50; margin-bottom:20px;">Resumen Ejecutivo de Inventario</h2>
             
             <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:30px;">
-                <div style="background:white; border-radius:10px; padding:20px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
-                    <div style="color:#2C3E50; font-size:16px; margin-bottom:10px;">Productos Sin Movimiento</div>
+                <!-- Tarjeta Productos Sin Movimiento -->
+                <div style="background:white; border-radius:10px; padding:20px; box-shadow:0 4px 6px rgba(0,0,0,0.1); cursor:pointer;" 
+                    onclick="toggleDetalle('productosSinMovimiento')">
+                    <div style="color:#2C3E50; font-size:16px; margin-bottom:10px;">
+                        Productos Sin Movimiento
+                        <span style="font-size:12px; color:#6c757d; float:right;">🔍 Click para ver detalle</span>
+                    </div>
                     <div style="font-size:24px; font-weight:bold; margin-bottom:5px; color:#F1C40F;">5</div>
                     <div style="font-size:14px; color:#666;">9.1% del inventario no ha tenido ventas</div>
+                    
+            <div id="productosSinMovimientoDetalle" style="display:none; margin-top:10px; padding:15px; background:#FFF3CD; border-radius:5px; border:1px solid #FFC107;">
+                <strong style="color:#856404;">Productos sin ventas registradas:</strong>
+                <ul style="margin-top:10px; color:#856404;">
+            
+                    <li style="margin:5px 0;">
+                        <strong>PERNIL DESPOSTE </strong> (Código: 328)
+                        <span style="color:#6c757d;"> - Stock actual: 507.25 kg</span>
+                    </li>
+                
+                    <li style="margin:5px 0;">
+                        <strong>BRAZO DESPOSTE </strong> (Código: 333)
+                        <span style="color:#6c757d;"> - Stock actual: 210.00 kg</span>
+                    </li>
+                
+                    <li style="margin:5px 0;">
+                        <strong>LOMO DESPOSTE </strong> (Código: 320)
+                        <span style="color:#6c757d;"> - Stock actual: 13.60 kg</span>
+                    </li>
+                
+                    <li style="margin:5px 0;">
+                        <strong>RECORTE DE CHULETA</strong> (Código: 259)
+                        <span style="color:#6c757d;"> - Stock actual: 11.70 kg</span>
+                    </li>
+                
+                    <li style="margin:5px 0;">
+                        <strong>CARTILAGOS </strong> (Código: 68)
+                        <span style="color:#6c757d;"> - Stock actual: 6.45 kg</span>
+                    </li>
+                
+                </ul>
+            </div>
+            
                 </div>
                 
+                <!-- Tarjeta Productos Críticos -->
                 <div style="background:white; border-radius:10px; padding:20px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                     <div style="color:#2C3E50; font-size:16px; margin-bottom:10px;">Productos en Estado Crítico</div>
                     <div style="font-size:24px; font-weight:bold; margin-bottom:5px; color:#E74C3C;">30</div>
                     <div style="font-size:14px; color:#666;">54.5% tienen stock bajo el promedio</div>
                 </div>
                 
+                <!-- Tarjeta Stock Total -->
                 <div style="background:white; border-radius:10px; padding:20px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                     <div style="color:#2C3E50; font-size:16px; margin-bottom:10px;">Stock Total</div>
                     <div style="font-size:24px; font-weight:bold; margin-bottom:5px; color:#2ECC71;">10,418 kg</div>
@@ -210,12 +250,111 @@
             <div style="background:#F8F9FA; border-radius:10px; padding:20px;">
                 <h3 style="color:#2C3E50; margin-bottom:15px;">Recomendaciones Principales</h3>
                 <ul style="color:#555;">
-                    <li><strong>Atención Inmediata:</strong> 10 productos requieren reposición urgente.</li>
-                    <li><strong>Sobrestock:</strong> 10 productos tienen niveles de stock significativamente altos.</li>
-                    <li><strong>Productos Sin Movimiento:</strong> Evaluar estrategias para 5 productos sin ventas recientes.</li>
+                    <li style="margin-bottom:10px; cursor:pointer;" onclick="toggleDetalle('productosUrgentes')">
+                        <strong>Atención Inmediata:</strong> 10 productos requieren reposición urgente.
+                        <span style="font-size:12px; color:#6c757d;">(Click para ver)</span>
+                    </li>
+                    
+            <div id="productosUrgentesDetalle" style="display:none; margin-top:10px; padding:15px; background:#FFEBEE; border-radius:5px; border:1px solid #F5C6CB;">
+                <strong style="color:#721C24;">Top productos que requieren reposición urgente:</strong>
+                <ol style="margin-top:10px; color:#721C24;">
+            
+                    <li style="margin:5px 0;">
+                        MILANESA DE PIERNA: Stock 689.6 kg 
+                        <span style="color:#dc3545;">(Déficit: 2558.7 kg)</span>
+                    </li>
+                
+                    <li style="margin:5px 0;">
+                        CABEZA: Stock 211.8 kg 
+                        <span style="color:#dc3545;">(Déficit: 625.3 kg)</span>
+                    </li>
+                
+                    <li style="margin:5px 0;">
+                        BRAZO PULPO: Stock 51.7 kg 
+                        <span style="color:#dc3545;">(Déficit: 615.5 kg)</span>
+                    </li>
+                
+                    <li style="margin:5px 0;">
+                        LOMO ALMENDRA: Stock 179.3 kg 
+                        <span style="color:#dc3545;">(Déficit: 599.5 kg)</span>
+                    </li>
+                
+                    <li style="margin:5px 0;">
+                        TOCINO CORRIENTE: Stock 111.4 kg 
+                        <span style="color:#dc3545;">(Déficit: 576.3 kg)</span>
+                    </li>
+                
+                </ol>
+            </div>
+            
+                    
+                    <li style="margin-bottom:10px; cursor:pointer;" onclick="toggleDetalle('productosObrestock')">
+                        <strong>Sobrestock:</strong> 10 productos tienen niveles de stock significativamente altos.
+                        <span style="font-size:12px; color:#6c757d;">(Click para ver)</span>
+                    </li>
+                    
+            <div id="productosObrestockDetalle" style="display:none; margin-top:10px; padding:15px; background:#E8F5E9; border-radius:5px; border:1px solid #C3E6CB;">
+                <strong style="color:#155724;">Top productos con sobrestock:</strong>
+                <ol style="margin-top:10px; color:#155724;">
+            
+                    <li style="margin:5px 0;">
+                        PUNTAS DE COSTILLA: Stock 1180.7 kg 
+                        <span style="color:#28a745;">(Exceso: 704.9 kg)</span>
+                    </li>
+                
+                    <li style="margin:5px 0;">
+                        CABEZA DE LOMO: Stock 761.8 kg 
+                        <span style="color:#28a745;">(Exceso: 547.7 kg)</span>
+                    </li>
+                
+                    <li style="margin:5px 0;">
+                        PERNIL DESPOSTE : Stock 507.2 kg 
+                        <span style="color:#28a745;">(Exceso: 507.2 kg)</span>
+                    </li>
+                
+                    <li style="margin:5px 0;">
+                        CHULETA DE BRAZO: Stock 560.8 kg 
+                        <span style="color:#28a745;">(Exceso: 369.3 kg)</span>
+                    </li>
+                
+                    <li style="margin:5px 0;">
+                        Chorizo Ahumado x19 Unds: Stock 471.0 kg 
+                        <span style="color:#28a745;">(Exceso: 367.0 kg)</span>
+                    </li>
+                
+                </ol>
+            </div>
+            
+                    
+                    <li>
+                        <strong>Productos Sin Movimiento:</strong> Evaluar estrategias para 5 productos sin ventas recientes.
+                         (Ver detalle arriba ↑)
+                    </li>
                 </ul>
             </div>
         </div>
+        
+        <script>
+        function toggleDetalle(id) {
+            const elemento = document.getElementById(id + 'Detalle');
+            if (elemento) {
+                if (elemento.style.display === 'none') {
+                    elemento.style.display = 'block';
+                    // Animación suave
+                    elemento.style.opacity = '0';
+                    setTimeout(() => {
+                        elemento.style.transition = 'opacity 0.3s';
+                        elemento.style.opacity = '1';
+                    }, 10);
+                } else {
+                    elemento.style.opacity = '0';
+                    setTimeout(() => {
+                        elemento.style.display = 'none';
+                    }, 300);
+                }
+            }
+        }
+        </script>
         
             </div>
             
