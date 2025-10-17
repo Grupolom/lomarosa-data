@@ -40,12 +40,41 @@ jobs:
           mkdir -p data output
           echo "✅ Directorios creados"
       
+      # ← NUEVO PASO: Descargar archivos de OneDrive
+      - name: 📥 Download files from OneDrive
+        run: |
+          echo "📥 Descargando archivos desde OneDrive..."
+          
+          # Descargar inventario
+          if [ -n "${{ secrets.ONEDRIVE_INVENTARIO_URL }}" ]; then
+            echo "Descargando INVENTARIO_LOMAROSA.xlsx..."
+            curl -L "${{ secrets.ONEDRIVE_INVENTARIO_URL }}" -o data/INVENTARIO_LOMAROSA.xlsx
+            echo "✅ Inventario descargado"
+          else
+            echo "⚠️ ONEDRIVE_INVENTARIO_URL no configurado, usando archivos locales"
+          fi
+          
+          # Descargar consolidado
+          if [ -n "${{ secrets.ONEDRIVE_CONSOLIDADO_URL }}" ]; then
+            echo "Descargando consolidado.xlsx..."
+            curl -L "${{ secrets.ONEDRIVE_CONSOLIDADO_URL }}" -o data/consolidado.xlsx
+            echo "✅ Consolidado descargado"
+          else
+            echo "⚠️ ONEDRIVE_CONSOLIDADO_URL no configurado, usando archivos locales"
+          fi
+          
+          echo "📂 Contenido de data/:"
+          ls -lah data/
+      
       - name: 🔍 Verify environment
         run: |
           echo "Python version: $(python --version)"
           echo "Current directory: $(pwd)"
           echo "Files in repo:"
           ls -la
+          echo ""
+          echo "Files in data/:"
+          ls -la data/ || echo "⚠️ Carpeta data/ vacía o no existe"
       
       - name: 📊 Generate dashboard
         run: |
