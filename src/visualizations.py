@@ -1,14 +1,15 @@
 """
 Módulo de Visualizaciones - Dashboard Inventario Lomarosa
 Réplica exacta del notebook con análisis de ventas históricas
+ACTUALIZADO: Ahora incluye análisis mejorado por Macropiezas + métodos originales
 """
 
 import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 import pandas as pd
+import numpy as np
 import config
-
 
 class DashboardVisualizations:
     """Clase para generar visualizaciones del dashboard"""
@@ -53,7 +54,7 @@ class DashboardVisualizations:
                 "valueformat": ","
             },
             title={
-                "text": "<span style='font-size:0.8em;'>en inventario</span>",  # ← CAMBIO: Quitado "Total Productos"
+                "text": "<span style='font-size:0.8em;'>en inventario</span>",
                 "font": {"size": 16, "color": colors['title']}
             },
             domain={'row': 0, 'column': 0}
@@ -69,7 +70,7 @@ class DashboardVisualizations:
                 "valueformat": ","
             },
             title={
-                "text": "<span style='font-size:0.8em;'>sobre el promedio</span>",  # ← CAMBIO: Quitado "Stock Adecuado"
+                "text": "<span style='font-size:0.8em;'>sobre el promedio</span>",
                 "font": {"size": 16, "color": colors['title']}
             },
             domain={'row': 0, 'column': 1}
@@ -85,7 +86,7 @@ class DashboardVisualizations:
                 "valueformat": ","
             },
             title={
-                "text": "<span style='font-size:0.8em;'>bajo el promedio</span>",  # ← CAMBIO: Quitado "Bajo Stock"
+                "text": "<span style='font-size:0.8em;'>bajo el promedio</span>",
                 "font": {"size": 16, "color": colors['title']}
             },
             domain={'row': 0, 'column': 2}
@@ -100,7 +101,7 @@ class DashboardVisualizations:
                 "valueformat": ",.1f"
             },
             title={
-                "text": "<span style='font-size:0.8em;'>kilogramos</span>",  # ← CAMBIO: Quitado "Stock Total"
+                "text": "<span style='font-size:0.8em;'>kilogramos</span>",
                 "font": {"size": 16, "color": colors['title']}
             },
             domain={'row': 0, 'column': 3}
@@ -125,11 +126,13 @@ class DashboardVisualizations:
         
         return fig
 
-    
     def create_dashboard_completo(self):
-        """Crea dashboard completo 2x2 (Código 9 del notebook)"""
+        """Crea dashboard completo 2x2 con análisis mejorado por macropiezas"""
         if not self.has_historical:
             return self._create_empty_chart("No hay datos históricos disponibles para este análisis")
+        
+        # Importar numpy para los cálculos
+        import numpy as np
         
         colors = {
             'sobrestock': '#E74C3C',
@@ -139,7 +142,267 @@ class DashboardVisualizations:
             'background': '#ECF0F1'
         }
         
-        # Obtener datos
+        # === NUEVO CÓDIGO DE ANÁLISIS POR MACROPIEZAS ===
+        
+        try:
+            # Obtener datos desde el processor usando la estructura correcta
+            analisis_actual = self.analisis  # Datos ya combinados en el processor
+            
+            print("🔍 Iniciando análisis por Macropiezas...")
+            
+            # Verificar que tenemos las columnas necesarias
+            if 'Macropieza' not in analisis_actual.columns:
+                print("❌ No se encontró columna 'Macropieza' en los datos")
+                return self._create_dashboard_original()
+            
+            # Calcular promedios por Macropieza desde los datos ya procesados
+            promedios_macro = analisis_actual.groupby('Macropieza').agg({
+                'Stock_Actual': 'sum',
+                'Promedio_Semanal': 'sum',
+                'Num_Ventas': 'sum'
+            }).reset_index()
+            
+            # Calcular diferencias y ratios
+            promedios_macro['Diferencia'] = promedios_macro['Stock_Actual'] - promedios_macro['Promedio_Semanal']
+            promedios_macro['Diferencia_Abs'] = abs(promedios_macro['Diferencia'])
+            
+            # Evitar división por cero
+            promedios_macro['Porcentaje_Diferencia'] = np.where(
+                promedios_macro['Promedio_Semanal'] > 0,
+                (promedios_macro['Diferencia'] / promedios_macro['Promedio_Semanal'] * 100),
+                0
+            )
+            
+            promedios_macro['Ratio_Stock_Promedio'] = np.where(
+                promedios_macro['Promedio_Semanal'] > 0,
+                promedios_macro['Stock_Actual'] / promedios_macro['Promedio_Semanal'],
+                0
+            )
+            
+            # Filtrar macropiezas válidas (excluir "Sin clasificar" y valores nulos)
+            promedios_macro = promedios_macro[
+                (promedios_macro['Macropieza'] != 'Sin clasificar') & 
+                (promedios_macro['Macropieza'].notna()) &
+                (promedios_macro['Promedio_Semanal'] > 0)
+            ]
+            
+            # Ordenar por diferencia absoluta y tomar los top 10
+            top_diferencias = promedios_macro.nlargest(10, 'Diferencia_Abs')
+            
+            # Encontrar macropiezas con mayor ratio sobre su promedio
+            top_sobre_promedio = promedios_macro.nlargest(10, 'Ratio_Stock_Promedio')
+            
+            print(f"✅ Análisis completado:")
+            print(f"  - {len(promedios_macro)} macropiezas analizadas")
+            print(f"  - Top diferencias: {len(top_diferencias)} items")
+            print(f"  - Top ratios: {len(top_sobre_promedio)} items")
+            
+        except Exception as e:
+            print(f"❌ Error en análisis de macropiezas: {e}")
+            import traceback
+            traceback.print_exc()
+            # Fallback a los análisis originales
+            return self._create_dashboard_original()
+        
+        # Mantener los otros análisis originales para los gráficos 3 y 4
+        top_rotacion = self.processor.get_top_rotacion(10)
+        
+        # === CREAR SUBPLOTS 2x2 ===
+        fig = make_subplots(
+            rows=2, cols=2,
+            subplot_titles=(
+                'Top 10 Macropiezas: Diferencias más Significativas',
+                'Top 10 Macropiezas: Mayor Stock vs Promedio', 
+                'Distribución del Estado de Inventario',
+                'Productos con Mayor Rotación'
+            ),
+            vertical_spacing=0.28,
+            horizontal_spacing=0.12,
+            specs=[
+                [{"type": "bar"}, {"type": "bar"}],
+                [{"type": "pie"}, {"type": "bar"}]
+            ]
+        )
+        
+        # === GRÁFICA 1: Stock actual vs Promedio de ventas (por diferencias) ===
+        if len(top_diferencias) > 0:
+            fig.add_trace(
+                go.Bar(
+                    name='Stock Actual',
+                    x=top_diferencias['Macropieza'].tolist(),
+                    y=top_diferencias['Stock_Actual'].tolist(),
+                    text=[f"{x:.1f}" for x in top_diferencias['Stock_Actual']],
+                    textposition='auto',
+                    marker_color='lightblue',
+                    opacity=0.8
+                ),
+                row=1, col=1
+            )
+            
+            fig.add_trace(
+                go.Bar(
+                    name='Promedio Semanal',
+                    x=top_diferencias['Macropieza'].tolist(),
+                    y=top_diferencias['Promedio_Semanal'].tolist(),
+                    text=[f"{x:.1f}" for x in top_diferencias['Promedio_Semanal']],
+                    textposition='auto',
+                    marker_color='lightgreen',
+                    opacity=0.8
+                ),
+                row=1, col=1
+            )
+            
+            # Agregar anotaciones con el porcentaje de diferencia
+            for i, (idx, row) in enumerate(top_diferencias.iterrows()):
+                fig.add_annotation(
+                    x=i,
+                    y=max(row['Stock_Actual'], row['Promedio_Semanal']) * 1.1,
+                    text=f"{row['Porcentaje_Diferencia']:+.0f}%",
+                    showarrow=True,
+                    arrowhead=2,
+                    yshift=10,
+                    row=1, col=1,
+                    font=dict(size=10, color='red' if row['Diferencia'] < 0 else 'green')
+                )
+        
+        # === GRÁFICA 2: Stock vs promedio (por ratios) ===
+        if len(top_sobre_promedio) > 0:
+            fig.add_trace(
+                go.Bar(
+                    name='Stock Actual',
+                    x=top_sobre_promedio['Macropieza'].tolist(),
+                    y=top_sobre_promedio['Stock_Actual'].tolist(),
+                    text=[f"{x:.1f}" for x in top_sobre_promedio['Stock_Actual']],
+                    textposition='auto',
+                    marker_color='lightblue',
+                    opacity=0.8,
+                    showlegend=False
+                ),
+                row=1, col=2
+            )
+            
+            fig.add_trace(
+                go.Bar(
+                    name='Promedio Semanal',
+                    x=top_sobre_promedio['Macropieza'].tolist(),
+                    y=top_sobre_promedio['Promedio_Semanal'].tolist(),
+                    text=[f"{x:.1f}" for x in top_sobre_promedio['Promedio_Semanal']],
+                    textposition='auto',
+                    marker_color='lightgreen',
+                    opacity=0.8,
+                    showlegend=False
+                ),
+                row=1, col=2
+            )
+            
+            # Agregar anotaciones con el ratio de stock sobre promedio
+            for i, (idx, row) in enumerate(top_sobre_promedio.iterrows()):
+                fig.add_annotation(
+                    x=i,
+                    y=max(row['Stock_Actual'], row['Promedio_Semanal']) * 1.1,
+                    text=f"{row['Ratio_Stock_Promedio']:.1f}x",
+                    showarrow=True,
+                    arrowhead=2,
+                    yshift=10,
+                    row=1, col=2,
+                    font=dict(size=10, color='blue')
+                )
+        
+        # === GRÁFICA 3: Pie Chart (mantener original) ===
+        bajo_promedio = len(self.analisis[self.analisis['Estado'] == 'Bajo Promedio'])
+        stock_adecuado = len(self.analisis[self.analisis['Estado'] == 'Stock Adecuado'])
+        
+        labels = ['Bajo Promedio', 'Stock Adecuado']
+        values = [bajo_promedio, stock_adecuado]
+        colors_pie = [colors['sobrestock'], colors['stock_normal']]
+        
+        fig.add_trace(
+            go.Pie(
+                labels=labels,
+                values=values,
+                hole=0.4,
+                marker_colors=colors_pie,
+                textinfo='percent+label',
+                textposition='outside',
+                showlegend=False
+            ),
+            row=2, col=1
+        )
+        
+        # === GRÁFICA 4: Top Rotación (mantener original) ===
+        if top_rotacion is not None and len(top_rotacion) > 0:
+            fig.add_trace(
+                go.Bar(
+                    x=top_rotacion['Producto'].tolist()[:10],  # Limitar a 10
+                    y=top_rotacion['Num_Ventas'].tolist()[:10],
+                    marker_color=colors['stock_normal'],
+                    name='Número de Ventas',
+                    showlegend=False,
+                    text=top_rotacion['Num_Ventas'].tolist()[:10],
+                    textposition='auto'
+                ),
+                row=2, col=2
+            )
+        
+        # === ACTUALIZAR LAYOUT ===
+        fig.update_layout(
+            title=dict(
+                text='<b>Dashboard de Control de Inventario - Análisis por Macropiezas</b>',
+                x=0.5,
+                y=0.98,
+                xanchor='center',
+                yanchor='top',
+                font=dict(size=22, color=colors['text'])
+            ),
+            height=1150,
+            showlegend=True,
+            template='plotly_white',
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
+            ),
+            font=dict(family="Arial", size=11, color=colors['text']),
+            margin=dict(t=120, b=60, l=40, r=40)
+        )
+        
+        # Actualizar ejes
+        fig.update_yaxes(title_text="Cantidad (kg)", row=1, col=1)
+        fig.update_yaxes(title_text="Cantidad (kg)", row=1, col=2) 
+        fig.update_yaxes(title_text="Número de Ventas", row=2, col=2)
+        
+        # Rotar etiquetas del eje x para mejor legibilidad
+        fig.update_xaxes(tickangle=45, row=1, col=1)
+        fig.update_xaxes(tickangle=45, row=1, col=2)
+        fig.update_xaxes(tickangle=45, row=2, col=2)
+        
+        # Actualizar títulos de ejes
+        fig.update_xaxes(title_text="Macropieza", row=1, col=1)
+        fig.update_xaxes(title_text="Macropieza", row=1, col=2)
+        fig.update_xaxes(title_text="Producto", row=2, col=2)
+        
+        # Actualizar tamaño de las anotaciones
+        for annotation in fig.layout.annotations:
+            if len(annotation.text.split()) < 4:  # Solo ajustar anotaciones de datos, no títulos
+                annotation.update(font=dict(size=11))
+        
+        return fig
+
+    def _create_dashboard_original(self):
+        """Dashboard original como fallback"""
+        print("⚠️ Usando dashboard original como respaldo")
+        
+        colors = {
+            'sobrestock': '#E74C3C',
+            'stock_normal': '#3498DB',
+            'deficit': '#E67E22',
+            'text': '#2C3E50',
+            'background': '#ECF0F1'
+        }
+        
+        # Obtener datos originales
         top_sobrestock = self.processor.get_top_sobrestock(10)
         top_deficit = self.processor.get_top_deficit(10)
         top_rotacion = self.processor.get_top_rotacion(10)
@@ -249,8 +512,8 @@ class DashboardVisualizations:
         if top_rotacion is not None and len(top_rotacion) > 0:
             fig.add_trace(
                 go.Bar(
-                    x=top_rotacion['Producto'],
-                    y=top_rotacion['Num_Ventas'],
+                    x=top_rotacion['Producto'].tolist(),
+                    y=top_rotacion['Num_Ventas'].tolist(),
                     marker_color=colors['stock_normal'],
                     name='Número de Ventas',
                     showlegend=False
@@ -261,7 +524,7 @@ class DashboardVisualizations:
         # Actualizar layout
         fig.update_layout(
             title=dict(
-                text='<b>Dashboard de Control de Inventario</b>',
+                text='<b>Dashboard de Control de Inventario (Respaldo)</b>',
                 x=0.5,
                 y=0.98,
                 xanchor='center',
@@ -335,9 +598,11 @@ class DashboardVisualizations:
             {productos_html}
         </div>
         """
+
+    # === TUS MÉTODOS ORIGINALES COMPLETOS ===
     
     def create_resumen_ejecutivo(self):
-        """Crea HTML de resumen ejecutivo (Código 10 del notebook)"""
+        """Crea HTML de resumen ejecutivo con detalles expandibles"""
         if not self.has_historical:
             return "<p style='text-align:center; color:#666; padding:30px;'>No hay datos históricos disponibles</p>"
         
@@ -349,44 +614,156 @@ class DashboardVisualizations:
         pct_sin_ventas = (productos_sin_ventas / total_productos) * 100 if total_productos > 0 else 0
         pct_criticos = (productos_criticos / total_productos) * 100 if total_productos > 0 else 0
         
+        # Obtener los productos sin movimiento (sin ventas)
+        productos_sin_movimiento = self.analisis[self.analisis['Num_Ventas'] == 0].copy()
+        productos_sin_movimiento = productos_sin_movimiento.sort_values('Stock_Actual', ascending=False)
+        
+        # Crear lista HTML de productos sin movimiento
+        productos_sin_mov_html = ""
+        if len(productos_sin_movimiento) > 0:
+            productos_sin_mov_html = """
+            <div id="productosSinMovimientoDetalle" style="display:none; margin-top:10px; padding:15px; background:#FFF3CD; border-radius:5px; border:1px solid #FFC107;">
+                <strong style="color:#856404;">Productos sin ventas registradas:</strong>
+                <ul style="margin-top:10px; color:#856404;">
+            """
+            for _, row in productos_sin_movimiento.iterrows():
+                stock_actual = row['Stock_Actual']
+                producto = row['Producto']
+                codigo = row.get('Codigo', 'N/A')
+                productos_sin_mov_html += f"""
+                    <li style="margin:5px 0;">
+                        <strong>{producto}</strong> (Código: {codigo})
+                        <span style="color:#6c757d;"> - Stock actual: {stock_actual:.2f} kg</span>
+                    </li>
+                """
+            productos_sin_mov_html += """
+                </ul>
+            </div>
+            """
+        
+        # Obtener top productos críticos y con sobrestock para las recomendaciones
         top_deficit = self.processor.get_top_deficit(10)
         top_sobrestock = self.processor.get_top_sobrestock(10)
+        
+        # Crear tooltips o detalles expandibles para las recomendaciones
+        productos_criticos_detalle = ""
+        if top_deficit is not None and len(top_deficit) > 0:
+            productos_criticos_detalle = """
+            <div id="productosUrgentesDetalle" style="display:none; margin-top:10px; padding:15px; background:#FFEBEE; border-radius:5px; border:1px solid #F5C6CB;">
+                <strong style="color:#721C24;">Top productos que requieren reposición urgente:</strong>
+                <ol style="margin-top:10px; color:#721C24;">
+            """
+            for idx, (_, row) in enumerate(top_deficit.head(5).iterrows(), 1):
+                deficit = abs(row['Diferencia'])
+                productos_criticos_detalle += f"""
+                    <li style="margin:5px 0;">
+                        {row['Producto']}: Stock {row['Stock_Actual']:.1f} kg 
+                        <span style="color:#dc3545;">(Déficit: {deficit:.1f} kg)</span>
+                    </li>
+                """
+            productos_criticos_detalle += """
+                </ol>
+            </div>
+            """
+        
+        productos_sobrestock_detalle = ""
+        if top_sobrestock is not None and len(top_sobrestock) > 0:
+            productos_sobrestock_detalle = """
+            <div id="productosObrestockDetalle" style="display:none; margin-top:10px; padding:15px; background:#E8F5E9; border-radius:5px; border:1px solid #C3E6CB;">
+                <strong style="color:#155724;">Top productos con sobrestock:</strong>
+                <ol style="margin-top:10px; color:#155724;">
+            """
+            for idx, (_, row) in enumerate(top_sobrestock.head(5).iterrows(), 1):
+                exceso = row['Diferencia']
+                productos_sobrestock_detalle += f"""
+                    <li style="margin:5px 0;">
+                        {row['Producto']}: Stock {row['Stock_Actual']:.1f} kg 
+                        <span style="color:#28a745;">(Exceso: {exceso:.1f} kg)</span>
+                    </li>
+                """
+            productos_sobrestock_detalle += """
+                </ol>
+            </div>
+            """
         
         return f"""
         <div style="font-family:Arial; max-width:1200px; margin:20px auto; padding:20px;">
             <h2 style="color:#2C3E50; margin-bottom:20px;">Resumen Ejecutivo de Inventario</h2>
             
             <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:30px;">
-                <div style="background:white; border-radius:10px; padding:20px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
-                    <div style="color:#2C3E50; font-size:16px; margin-bottom:10px;">Productos Sin Movimiento</div>
-                    <div style="font-size:24px; font-weight:bold; margin-bottom:5px; color:#F1C40F;">{productos_sin_ventas:,}</div>
+                <!-- Tarjeta Productos Sin Movimiento -->
+                <div style="background:white; border-radius:10px; padding:20px; box-shadow:0 4px 6px rgba(0,0,0,0.1); cursor:pointer;" 
+                    onclick="toggleDetalle('productosSinMovimiento')">
+                    <div style="color:#2C3E50; font-size:16px; margin-bottom:10px;">
+                        Productos Sin Movimiento
+                        <span style="font-size:12px; color:#6c757d; float:right;">🔍 Click para ver detalle</span>
+                    </div>
+                    <div style="font-size:24px; font-weight:bold; margin-bottom:5px; color:#F1C40F;">{productos_sin_ventas}</div>
                     <div style="font-size:14px; color:#666;">{pct_sin_ventas:.1f}% del inventario no ha tenido ventas</div>
+                    {productos_sin_mov_html}
                 </div>
                 
+                <!-- Tarjeta Productos Críticos -->
                 <div style="background:white; border-radius:10px; padding:20px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                     <div style="color:#2C3E50; font-size:16px; margin-bottom:10px;">Productos en Estado Crítico</div>
-                    <div style="font-size:24px; font-weight:bold; margin-bottom:5px; color:#E74C3C;">{productos_criticos:,}</div>
+                    <div style="font-size:24px; font-weight:bold; margin-bottom:5px; color:#E74C3C;">{productos_criticos}</div>
                     <div style="font-size:14px; color:#666;">{pct_criticos:.1f}% tienen stock bajo el promedio</div>
                 </div>
                 
+                <!-- Tarjeta Stock Total -->
                 <div style="background:white; border-radius:10px; padding:20px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                     <div style="color:#2C3E50; font-size:16px; margin-bottom:10px;">Stock Total</div>
                     <div style="font-size:24px; font-weight:bold; margin-bottom:5px; color:#2ECC71;">{stats['stock_total_kilos']:,.0f} kg</div>
-                    <div style="font-size:14px; color:#666;">Distribuido en {total_productos:,} productos</div>
+                    <div style="font-size:14px; color:#666;">Distribuido en {total_productos} productos</div>
                 </div>
             </div>
             
             <div style="background:#F8F9FA; border-radius:10px; padding:20px;">
                 <h3 style="color:#2C3E50; margin-bottom:15px;">Recomendaciones Principales</h3>
                 <ul style="color:#555;">
-                    <li><strong>Atención Inmediata:</strong> {len(top_deficit) if top_deficit is not None else 0} productos requieren reposición urgente.</li>
-                    <li><strong>Sobrestock:</strong> {len(top_sobrestock) if top_sobrestock is not None else 0} productos tienen niveles de stock significativamente altos.</li>
-                    <li><strong>Productos Sin Movimiento:</strong> Evaluar estrategias para {productos_sin_ventas:,} productos sin ventas recientes.</li>
+                    <li style="margin-bottom:10px; cursor:pointer;" onclick="toggleDetalle('productosUrgentes')">
+                        <strong>Atención Inmediata:</strong> {len(top_deficit) if top_deficit is not None else 0} productos requieren reposición urgente.
+                        <span style="font-size:12px; color:#6c757d;">(Click para ver)</span>
+                    </li>
+                    {productos_criticos_detalle}
+                    
+                    <li style="margin-bottom:10px; cursor:pointer;" onclick="toggleDetalle('productosObrestock')">
+                        <strong>Sobrestock:</strong> {len(top_sobrestock) if top_sobrestock is not None else 0} productos tienen niveles de stock significativamente altos.
+                        <span style="font-size:12px; color:#6c757d;">(Click para ver)</span>
+                    </li>
+                    {productos_sobrestock_detalle}
+                    
+                    <li>
+                        <strong>Productos Sin Movimiento:</strong> Evaluar estrategias para {productos_sin_ventas} productos sin ventas recientes.
+                        {' (Ver detalle arriba ↑)' if productos_sin_ventas > 0 else ''}
+                    </li>
                 </ul>
             </div>
         </div>
+        
+        <script>
+        function toggleDetalle(id) {{
+            const elemento = document.getElementById(id + 'Detalle');
+            if (elemento) {{
+                if (elemento.style.display === 'none') {{
+                    elemento.style.display = 'block';
+                    // Animación suave
+                    elemento.style.opacity = '0';
+                    setTimeout(() => {{
+                        elemento.style.transition = 'opacity 0.3s';
+                        elemento.style.opacity = '1';
+                    }}, 10);
+                }} else {{
+                    elemento.style.opacity = '0';
+                    setTimeout(() => {{
+                        elemento.style.display = 'none';
+                    }}, 300);
+                }}
+            }}
+        }}
+        </script>
         """
-    
+
     def create_tabla_productos_criticos(self):
         """Crea tabla de productos críticos con filtro por Macropieza"""
         if not self.has_historical:
@@ -543,7 +920,6 @@ class DashboardVisualizations:
         document.addEventListener('click', function(event) {{
             const dropdown = document.getElementById('macropiezaFilterDropdown');
             const button = document.getElementById('macropiezaFilterBtn');
-            
             if (!dropdown.contains(event.target) && event.target !== button) {{
                 dropdown.style.display = 'none';
             }}
@@ -622,7 +998,6 @@ class DashboardVisualizations:
         
         return html
 
-    
     def create_tabla_inventario_completo(self):
         """Crea tabla HTML interactiva con filtro multiselección tipo Excel"""
         if self.analisis is None:
@@ -780,7 +1155,6 @@ class DashboardVisualizations:
             if tiene_historico:
                 # Calcular badge de semanas de stock
                 semanas_stock = row['Semanas_Stock']
-                
                 if semanas_stock == -999:  # Error
                     semanas_html = '<span style="background: #34495E; color: white; padding: 5px 10px; border-radius: 10px; font-weight: bold; font-size: 11px;">⚠️ Error</span>'
                 elif semanas_stock == -1:  # Agotado
@@ -812,14 +1186,14 @@ class DashboardVisualizations:
                             </tr>
             """
         
-        html += """
+        html += f"""
                         </tbody>
                     </table>
                 </div>
                 
                 <!-- CONTADOR -->
                 <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px; text-align: center; color: #666;">
-                    <span id="rowCount">Total: {total_rows} productos</span> | 
+                    <span id="rowCount">Total: {len(df_tabla)} productos</span> | 
                     <span id="filteredCount"></span>
                 </div>
             </div>
@@ -980,7 +1354,7 @@ class DashboardVisualizations:
             }}
             
             document.getElementById('filteredCount').textContent = 
-                visibleCount !== {total_rows} ? `Mostrando: ${{visibleCount}} productos` : '';
+                visibleCount !== {len(df_tabla)} ? `Mostrando: ${{visibleCount}} productos` : '';
         }}
 
         function sortTable(columnIndex) {{
@@ -1036,7 +1410,7 @@ class DashboardVisualizations:
             }}
         }}
         </script>
-        """.format(total_rows=len(df_tabla))
+        """
         
         return html
     
@@ -1066,4 +1440,4 @@ class DashboardVisualizations:
 
 
 if __name__ == "__main__":
-    print("✅ Módulo de visualizaciones listo")
+    print("✅ Módulo de visualizaciones completo - Análisis por Macropiezas + métodos originales")

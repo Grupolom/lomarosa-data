@@ -20,7 +20,6 @@ try:
 except ImportError as e:
     print(f"❌ Error al importar módulos: {e}")
     print("Asegúrate de estar en la carpeta raíz del proyecto")
-    input("\nPresiona Enter para salir...")
     sys.exit(1)
 
 
@@ -33,22 +32,40 @@ def print_banner():
     print()
 
 
+def is_github_actions():
+    """Detecta si está corriendo en GitHub Actions"""
+    return os.getenv('GITHUB_ACTIONS') == 'true'
+
+
 def main():
     """Función principal del sistema"""
     print_banner()
     
+    # Detectar entorno
+    in_github_actions = is_github_actions()
+    
+    if in_github_actions:
+        print("🤖 Ejecutando en GitHub Actions...")
+        # En GitHub Actions, los archivos deben estar en data/
+        excel_path = config.EXCEL_PATH
+    else:
+        print("💻 Ejecutando localmente...")
+        excel_path = config.EXCEL_PATH
+    
     # Paso 1: Procesar datos
     print("PASO 1: Cargando y procesando datos...")
-    print(f"Ruta del Excel: {config.EXCEL_PATH}")
+    print(f"Ruta del Excel: {excel_path}")
     
-    processor = DataProcessor(config.EXCEL_PATH)
+    processor = DataProcessor(excel_path)
     
     if not processor.process():
         print("\n❌ ERROR: No se pudieron procesar los datos.")
         print("Verifica que el archivo Excel exista y tenga el formato correcto.")
-        print(f"Buscando en: {os.path.abspath(config.EXCEL_PATH)}")
-        input("\nPresiona Enter para salir...")
-        return False
+        print(f"Buscando en: {os.path.abspath(excel_path)}")
+        
+        if not in_github_actions:
+            input("\nPresiona Enter para salir...")
+        sys.exit(1)
     
     # Paso 2: Crear visualizaciones
     print("\nPASO 2: Creando visualizaciones...")
@@ -60,8 +77,10 @@ def main():
         print(f"\n❌ ERROR al crear visualizaciones: {str(e)}")
         import traceback
         traceback.print_exc()
-        input("\nPresiona Enter para salir...")
-        return False
+        
+        if not in_github_actions:
+            input("\nPresiona Enter para salir...")
+        sys.exit(1)
     
     # Paso 3: Generar HTML
     print("\nPASO 3: Generando dashboard HTML...")
@@ -73,8 +92,10 @@ def main():
         print(f"\n❌ ERROR al generar HTML: {str(e)}")
         import traceback
         traceback.print_exc()
-        input("\nPresiona Enter para salir...")
-        return False
+        
+        if not in_github_actions:
+            input("\nPresiona Enter para salir...")
+        sys.exit(1)
     
     # Resumen de ejecución
     print("\n" + "=" * 70)
@@ -90,21 +111,24 @@ def main():
     print(f"🕒 Fecha de generación: {stats['fecha_actualizacion']}")
     print("\n" + "=" * 70)
     
-    # Abrir automáticamente el HTML en el navegador
-    try:
-        print("\n🌐 Abriendo dashboard en el navegador...")
-        html_path = os.path.abspath(config.OUTPUT_HTML)
-        
-        # Verificar que el archivo existe
-        if os.path.exists(html_path):
-            webbrowser.open('file://' + html_path)
-            print("✅ Dashboard abierto en el navegador")
-        else:
-            print(f"⚠️ El archivo HTML no fue encontrado en: {html_path}")
+    # Abrir automáticamente el HTML en el navegador (solo local)
+    if not in_github_actions:
+        try:
+            print("\n🌐 Abriendo dashboard en el navegador...")
+            html_path = os.path.abspath(config.OUTPUT_HTML)
             
-    except Exception as e:
-        print(f"⚠️ No se pudo abrir automáticamente el navegador: {str(e)}")
-        print(f"Por favor, abre manualmente el archivo: {config.OUTPUT_HTML}")
+            # Verificar que el archivo existe
+            if os.path.exists(html_path):
+                webbrowser.open('file://' + html_path)
+                print("✅ Dashboard abierto en el navegador")
+            else:
+                print(f"⚠️ El archivo HTML no fue encontrado en: {html_path}")
+                
+        except Exception as e:
+            print(f"⚠️ No se pudo abrir automáticamente el navegador: {str(e)}")
+            print(f"Por favor, abre manualmente el archivo: {config.OUTPUT_HTML}")
+    else:
+        print("\n🌐 Dashboard listo para GitHub Pages")
     
     print("\n✅ Proceso completado exitosamente!")
     return True
@@ -122,5 +146,7 @@ if __name__ == "__main__":
         print(f"\n❌ ERROR INESPERADO: {str(e)}")
         import traceback
         traceback.print_exc()
-        input("\nPresiona Enter para salir...")
+        
+        if not is_github_actions():
+            input("\nPresiona Enter para salir...")
         sys.exit(1)
