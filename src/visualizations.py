@@ -1414,6 +1414,250 @@ class DashboardVisualizations:
         
         return html
     
+
+    def create_analisis_por_ubicacion(self):
+        """
+        Crea tabla de análisis de stock por tipo de almacenamiento/ubicación
+        Basado en el código del notebook [9]
+        """
+        if not self.has_historical or self.analisis is None:
+            return self._create_empty_chart("No hay datos disponibles para análisis por ubicación")
+        
+        try:
+            print("📦 Generando análisis por ubicación de almacenamiento...")
+            
+            # Preparar los datos para el análisis
+            analisis_stock = self.analisis.copy()
+            
+            # Función para evaluar estado del stock
+            def evaluar_estado_stock(row):
+                if pd.isna(row['Promedio_Semanal']) or row['Promedio_Semanal'] == 0:
+                    return 'Sin Ventas'
+                
+                ratio = row['Stock_Actual'] / row['Promedio_Semanal']
+                
+                # Lógica basada en el tipo de producto (simplificada)
+                # Podemos usar la Macropieza para determinar si es congelado o refrigerado
+                if ratio > 4:
+                    return 'Sobre Stock'
+                elif ratio < 1:
+                    return 'Stock Bajo'
+                else:
+                    return 'Stock Adecuado'
+            
+            # Agregar columna de estado
+            analisis_stock['Estado_Almacenamiento'] = analisis_stock.apply(evaluar_estado_stock, axis=1)
+            
+            # Calcular semanas de stock (ya lo tenemos en Semanas_Stock)
+            # Simular ubicación basada en Macropieza (en producción esto vendría de los datos reales)
+            def asignar_ubicacion(macropieza):
+                """Asigna ubicación basada en el tipo de macropieza"""
+                congelados = ['Lomo', 'Costilla', 'Cabeza de Lomo', 'Brazo sin hueso']
+                refrigerados = ['Tocino Cte', 'Panceta', 'Embutidos', 'Tocino Barriga']
+                
+                if macropieza in congelados:
+                    return 'Congelado (CAVA 1)'
+                elif macropieza in refrigerados:
+                    return 'Refrigerado (CAVA 2)'
+                else:
+                    # Asignación aleatoria para otros
+                    return 'Congelado (CAVA 1)' if hash(macropieza) % 2 == 0 else 'Refrigerado (CAVA 2)'
+            
+            analisis_stock['tipo_almacenamiento'] = analisis_stock['Macropieza'].apply(asignar_ubicacion)
+            analisis_stock['Ubicacion'] = analisis_stock['tipo_almacenamiento'].apply(
+                lambda x: 'CAVA 1' if 'CAVA 1' in x else 'CAVA 2'
+            )
+            
+            # Ordenar por ubicación y stock
+            analisis_stock = analisis_stock.sort_values(['Ubicacion', 'Stock_Actual'], ascending=[True, False])
+            
+            # Limitar a los primeros 30 productos para mejor visualización
+            analisis_stock_top = analisis_stock.head(30)
+            
+            # Crear tabla con Plotly usando tema oscuro como en el notebook
+            fig = go.Figure(data=[go.Table(
+                header=dict(
+                    values=['Código', 'Producto', 'Macropieza', 'Ubicación', 'Stock Actual (kg)', 
+                        'Prom. Ventas/Sem (kg)', 'Semanas de Stock', 'Estado'],
+                    font=dict(size=12, color='white'),
+                    fill_color='rgb(30, 30, 50)',
+                    align=['left', 'left', 'left', 'center', 'right', 'right', 'right', 'center'],
+                    height=40
+                ),
+                cells=dict(
+                    values=[
+                        analisis_stock_top['Codigo'],
+                        analisis_stock_top['Producto'],
+                        analisis_stock_top['Macropieza'],
+                        analisis_stock_top['tipo_almacenamiento'],
+                        analisis_stock_top['Stock_Actual'].round(1),
+                        analisis_stock_top['Promedio_Semanal'].round(1),
+                        analisis_stock_top['Semanas_Stock'].apply(
+                            lambda x: 'Sin datos' if x == -2 else 
+                                'Agotado' if x == -1 else
+                                'Error' if x == -999 else
+                                f'{x:.1f}'
+                        ),
+                        analisis_stock_top['Estado_Almacenamiento']
+                    ],
+                    font=dict(size=11, color='white'),
+                    fill_color=[
+                        'rgb(50, 50, 70)',  # Código
+                        'rgb(50, 50, 70)',  # Producto
+                        'rgb(50, 50, 70)',  # Macropieza
+                        'rgb(50, 50, 70)',  # Ubicación
+                        'rgb(50, 50, 70)',  # Stock Actual
+                        'rgb(50, 50, 70)',  # Prom. Ventas
+                        'rgb(50, 50, 70)',  # Semanas Stock
+                        # Color condicional para Estado
+                        [self._get_estado_color(estado) for estado in analisis_stock_top['Estado_Almacenamiento']]
+                    ],
+                    align=['left', 'left', 'left', 'center', 'right', 'right', 'right', 'center'],
+                    height=30
+                )
+            )])
+            
+            # Actualizar layout con tema oscuro
+            fig.update_layout(
+                title=dict(
+                    text='<b>Análisis de Stock por Ubicación de Almacenamiento</b>',
+                    font=dict(color='white', size=20),
+                    x=0.5,
+                    xanchor='center'
+                ),
+                height=800,
+                width=1200,
+                template='plotly_dark',
+                paper_bgcolor='rgb(30, 30, 50)',
+                plot_bgcolor='rgb(30, 30, 50)',
+                margin=dict(t=80, b=40, l=40, r=40)
+            )
+            
+            # Generar resumen estadístico
+            resumen_html = self._generar_resumen_ubicacion(analisis_stock)
+            
+            return fig, resumen_html
+            
+        except Exception as e:
+            print(f"❌ Error en análisis por ubicación: {e}")
+            import traceback
+            traceback.print_exc()
+            return self._create_empty_chart("Error al generar análisis por ubicación"), ""
+
+    def _get_estado_color(self, estado):
+        """Retorna el color para cada estado en la tabla"""
+        colores = {
+            'Sobre Stock': 'rgba(255, 50, 50, 0.3)',
+            'Stock Bajo': 'rgba(255, 150, 50, 0.3)',
+            'Stock Adecuado': 'rgba(50, 255, 50, 0.3)',
+            'Sin Ventas': 'rgba(150, 150, 150, 0.3)'
+        }
+        return colores.get(estado, 'rgb(50, 50, 70)')
+
+    def _generar_resumen_ubicacion(self, analisis_stock):
+        """Genera HTML con resumen estadístico por ubicación"""
+        try:
+            # Agrupar por ubicación y estado
+            resumen = analisis_stock.groupby(['tipo_almacenamiento', 'Estado_Almacenamiento']).size().unstack(fill_value=0)
+            
+            # Productos en ambas ubicaciones
+            productos_duplicados = analisis_stock[analisis_stock.duplicated(subset=['Codigo'], keep=False)]
+            
+            # Identificar sobre stock
+            sobre_stock = analisis_stock[analisis_stock['Estado_Almacenamiento'] == 'Sobre Stock'].head(5)
+            stock_bajo = analisis_stock[analisis_stock['Estado_Almacenamiento'] == 'Stock Bajo'].head(5)
+            
+            html = f"""
+            <div style="background: rgb(30, 30, 50); color: white; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                <h3 style="color: #667eea; margin-bottom: 20px;">📊 Resumen por Ubicación y Estado</h3>
+                
+                <!-- Tabla de resumen -->
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px;">
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #3498DB; margin-bottom: 10px;">CAVA 1 (Congelado)</h4>
+                        <ul style="list-style: none; padding: 0;">
+            """
+            
+            if 'Congelado (CAVA 1)' in resumen.index:
+                for estado, cantidad in resumen.loc['Congelado (CAVA 1)'].items():
+                    if cantidad > 0:
+                        html += f'<li style="margin: 5px 0;">• {estado}: <strong>{cantidad}</strong> productos</li>'
+            
+            html += """
+                        </ul>
+                    </div>
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #E74C3C; margin-bottom: 10px;">CAVA 2 (Refrigerado)</h4>
+                        <ul style="list-style: none; padding: 0;">
+            """
+            
+            if 'Refrigerado (CAVA 2)' in resumen.index:
+                for estado, cantidad in resumen.loc['Refrigerado (CAVA 2)'].items():
+                    if cantidad > 0:
+                        html += f'<li style="margin: 5px 0;">• {estado}: <strong>{cantidad}</strong> productos</li>'
+            
+            html += """
+                        </ul>
+                    </div>
+                </div>
+            """
+            
+            # Alertas de sobre stock
+            if len(sobre_stock) > 0:
+                html += """
+                <div style="background: rgba(255, 50, 50, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="color: #FF6B6B;">⚠️ Productos con Sobre Stock</h4>
+                    <ul style="margin-top: 10px;">
+                """
+                for _, row in sobre_stock.iterrows():
+                    semanas = row['Semanas_Stock'] if row['Semanas_Stock'] > 0 else 'N/A'
+                    html += f"""
+                        <li style="margin: 5px 0;">
+                            {row['Producto']} ({row['Ubicacion']}): 
+                            <strong>{row['Stock_Actual']:.1f} kg</strong> 
+                            - {semanas} semanas de stock
+                        </li>
+                    """
+                html += "</ul></div>"
+            
+            # Alertas de stock bajo
+            if len(stock_bajo) > 0:
+                html += """
+                <div style="background: rgba(255, 150, 50, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="color: #FFA500;">🔴 Productos con Stock Bajo</h4>
+                    <ul style="margin-top: 10px;">
+                """
+                for _, row in stock_bajo.iterrows():
+                    deficit = row['Promedio_Semanal'] - row['Stock_Actual']
+                    html += f"""
+                        <li style="margin: 5px 0;">
+                            {row['Producto']} ({row['Ubicacion']}): 
+                            <strong>{row['Stock_Actual']:.1f} kg</strong> 
+                            - Déficit: {deficit:.1f} kg
+                        </li>
+                    """
+                html += "</ul></div>"
+            
+            # Productos duplicados
+            if len(productos_duplicados) > 0:
+                html += """
+                <div style="background: rgba(102, 126, 234, 0.1); padding: 15px; border-radius: 8px;">
+                    <h4 style="color: #667eea;">📍 Productos en Múltiples Ubicaciones</h4>
+                    <p style="margin-top: 10px; color: #aaa;">
+                """
+                productos_unicos = productos_duplicados['Producto'].unique()[:5]
+                html += f"Se encontraron {len(productos_unicos)} productos en ambas cavas: "
+                html += ", ".join(productos_unicos)
+                html += "</p></div>"
+            
+            html += "</div>"
+            
+            return html
+            
+        except Exception as e:
+            print(f"⚠️ Error generando resumen: {e}")
+            return ""
+
     def _create_empty_chart(self, message):
         """Crea gráfico vacío con mensaje"""
         fig = go.Figure()
