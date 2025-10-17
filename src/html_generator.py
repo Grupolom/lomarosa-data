@@ -22,8 +22,8 @@ class HTMLGenerator:
         
         # Generar todas las visualizaciones
         kpi_fig = self.viz.create_kpi_cards()
-        dashboard_fig = self.viz.create_dashboard_completo()
-        
+        dashboard_fig = self.viz.create_dashboard_original()
+
         # Generar HTML de componentes
         alerta_html = self.viz.create_alerta_critica()
         resumen_html = self.viz.create_resumen_ejecutivo()
