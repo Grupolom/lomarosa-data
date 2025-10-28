@@ -1,21 +1,14 @@
-name: 📊 Update Dashboard Lomarosa
+name: "📊 Update Dashboard Lomarosa (DESACTIVADO)"
 
-on:
-  repository_dispatch:
-    types: [sharepoint_update]
-  
-  workflow_dispatch:
-  
-  push:
-    branches: [main]
-    paths:
-      - 'data/**'
-      - 'src/**'
-      - 'main.py'
-      - '.github/workflows/**'
+# ==========================================================
+# ⚠️ WORKFLOW DESACTIVADO
+# Para volver a activarlo, reemplazar `on: {}` por los triggers originales
+# ==========================================================
+on: {}
 
 jobs:
   build-and-deploy:
+    if: false  # seguridad adicional, evita ejecución manual accidental
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -40,35 +33,20 @@ jobs:
           mkdir -p data output
           echo "✅ Directorios creados"
       
-      - name: 🔍 Verify environment
+      - name: 📥 Download files from OneDrive
         run: |
-          echo "Python version: $(python --version)"
-          echo "Current directory: $(pwd)"
-          echo "Files in repo:"
-          ls -la
+          echo "📥 Descargando archivos desde OneDrive..."
+          if [ -n "${{ secrets.ONEDRIVE_INVENTARIO_URL }}" ]; then
+            echo "Descargando INVENTARIO_LOMAROSA.xlsx..."
+            curl -L "${{ secrets.ONEDRIVE_INVENTARIO_URL }}" -o data/INVENTARIO_LOMAROSA.xlsx
+          fi
+          if [ -n "${{ secrets.ONEDRIVE_CONSOLIDADO_URL }}" ]; then
+            echo "Descargando consolidado.xlsx..."
+            curl -L "${{ secrets.ONEDRIVE_CONSOLIDADO_URL }}" -o data/consolidado.xlsx
+          fi
       
       - name: 📊 Generate dashboard
-        run: |
-          python src/main.py
-        env:
-          GITHUB_ACTIONS: 'true'
-      
-      - name: ✅ Verify output
-        run: |
-          echo "=== Archivos generados en output/ ==="
-          if [ -d "output" ]; then
-            ls -lah output/
-            if [ -f "output/index.html" ]; then
-              echo "✅ Dashboard HTML generado correctamente"
-              echo "Tamaño: $(du -h output/index.html | cut -f1)"
-            else
-              echo "❌ No se encontró output/index.html"
-              exit 1
-            fi
-          else
-            echo "❌ Carpeta output/ no existe"
-            exit 1
-          fi
+        run: python src/main.py
       
       - name: 🚀 Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
@@ -76,14 +54,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./output
           publish_branch: gh-pages
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
-          commit_message: '🔄 Update dashboard - ${{ github.event.head_commit.message }}'
-          
-      - name: 🎉 Success notification
-        if: success()
-        run: |
-          echo "=========================================="
-          echo "✅ Dashboard actualizado exitosamente!"
-          echo "🌐 URL: https://grupolom.github.io/lomarosa-data/"
-          echo "=========================================="
+      
+      - name: 🎉 Success
+        run: echo "✅ DESACTIVADO - No se ejecutará"

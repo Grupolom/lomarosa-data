@@ -127,96 +127,78 @@ class DashboardVisualizations:
         return fig
 
     def create_dashboard_completo(self):
-        """Crea dashboard completo 2x2 con análisis mejorado por macropiezas"""
+        """
+        Crea dashboard completo 2x2 con análisis híbrido
+        CORREGIDO: Usa 'Producto' directamente sin agrupar (igual que el notebook)
+        """
         if not self.has_historical:
             return self._create_empty_chart("No hay datos históricos disponibles para este análisis")
         
-        # Importar numpy para los cálculos
         import numpy as np
         
         colors = {
-            'sobrestock': '#E74C3C',
-            'stock_normal': '#3498DB',
-            'deficit': '#E67E22',
+            'sobrestock': '#E74C3C',    # Rojo para sobrestock
+            'stock_normal': '#2ECC71',   # Verde para el promedio
+            'deficit': '#3498DB',       # Azul para déficit
             'text': '#2C3E50',
             'background': '#ECF0F1'
         }
         
-        # === NUEVO CÓDIGO DE ANÁLISIS POR MACROPIEZAS ===
-        
+        # === ANÁLISIS IGUAL QUE EL NOTEBOOK DEL AMIGO ===
         try:
-            # Obtener datos desde el processor usando la estructura correcta
-            analisis_actual = self.analisis  # Datos ya combinados en el processor
+            # Usar el dataframe analisis directamente (NO agrupar)
+            analisis = self.analisis.copy()
             
-            print("🔍 Iniciando análisis por Macropiezas...")
+            print("🔍 Iniciando análisis igual que notebook...")
+            print(f"  - Total registros: {len(analisis)}")
             
-            # Verificar que tenemos las columnas necesarias
-            if 'Macropieza' not in analisis_actual.columns:
-                print("❌ No se encontró columna 'Macropieza' en los datos")
-                return self._create_dashboard_original()
-            
-            # Calcular promedios por Macropieza desde los datos ya procesados
-            promedios_macro = analisis_actual.groupby('Macropieza').agg({
-                'Stock_Actual': 'sum',
-                'Promedio_Semanal': 'sum',
-                'Num_Ventas': 'sum'
-            }).reset_index()
-            
-            # Calcular diferencias y ratios
-            promedios_macro['Diferencia'] = promedios_macro['Stock_Actual'] - promedios_macro['Promedio_Semanal']
-            promedios_macro['Diferencia_Abs'] = abs(promedios_macro['Diferencia'])
-            
-            # Evitar división por cero
-            promedios_macro['Porcentaje_Diferencia'] = np.where(
-                promedios_macro['Promedio_Semanal'] > 0,
-                (promedios_macro['Diferencia'] / promedios_macro['Promedio_Semanal'] * 100),
-                0
+            # Calcular diferencias y ratios (IGUAL QUE EL AMIGO)
+            analisis['Diferencia'] = analisis['Stock_Actual'] - analisis['Promedio_Semanal']
+            analisis['Ratio_Cobertura'] = analisis['Stock_Actual'] / analisis['Promedio_Semanal'].where(
+                analisis['Promedio_Semanal'] > 0, 1
             )
             
-            promedios_macro['Ratio_Stock_Promedio'] = np.where(
-                promedios_macro['Promedio_Semanal'] > 0,
-                promedios_macro['Stock_Actual'] / promedios_macro['Promedio_Semanal'],
-                0
-            )
+            # Filtrar macropiezas válidas (IGUAL QUE EL AMIGO)
+            macropiezas_validas = analisis[analisis['Promedio_Semanal'] > 0].copy()
             
-            # Filtrar macropiezas válidas (excluir "Sin clasificar" y valores nulos)
-            promedios_macro = promedios_macro[
-                (promedios_macro['Macropieza'] != 'Sin clasificar') & 
-                (promedios_macro['Macropieza'].notna()) &
-                (promedios_macro['Promedio_Semanal'] > 0)
-            ]
+            print(f"  - Registros válidos (Promedio > 0): {len(macropiezas_validas)}")
             
-            # Ordenar por diferencia absoluta y tomar los top 10
-            top_diferencias = promedios_macro.nlargest(10, 'Diferencia_Abs')
+            # Identificar sobrestock y faltantes (IGUAL QUE EL AMIGO)
+            macropiezas_sobrestock = macropiezas_validas[
+                macropiezas_validas['Diferencia'] > 0
+            ].sort_values('Diferencia', ascending=False)
             
-            # Encontrar macropiezas con mayor ratio sobre su promedio
-            top_sobre_promedio = promedios_macro.nlargest(10, 'Ratio_Stock_Promedio')
+            macropiezas_faltante = macropiezas_validas[
+                macropiezas_validas['Diferencia'] < 0
+            ].sort_values('Diferencia')
+            
+            # Tomar top 10 (IGUAL QUE EL AMIGO)
+            top_sobrestock = macropiezas_sobrestock.head(10)
+            top_faltante = macropiezas_faltante.head(10)
             
             print(f"✅ Análisis completado:")
-            print(f"  - {len(promedios_macro)} macropiezas analizadas")
-            print(f"  - Top diferencias: {len(top_diferencias)} items")
-            print(f"  - Top ratios: {len(top_sobre_promedio)} items")
+            print(f"  - Sobrestock: {len(macropiezas_sobrestock)} items")
+            print(f"  - Faltantes: {len(macropiezas_faltante)} items")
             
         except Exception as e:
-            print(f"❌ Error en análisis de macropiezas: {e}")
+            print(f"❌ Error en análisis: {e}")
             import traceback
             traceback.print_exc()
-            # Fallback a los análisis originales
             return self._create_dashboard_original()
         
-        # Mantener los otros análisis originales para los gráficos 3 y 4
+        # Mantener análisis originales para gráficos 3 y 4
         top_rotacion = self.processor.get_top_rotacion(10)
         
         # === CREAR SUBPLOTS 2x2 ===
         fig = make_subplots(
             rows=2, cols=2,
             subplot_titles=(
-                'Top 10 Macropiezas con Mayor Sobrestock',
-                'Top 10 Macropiezas con Mayor Faltante', 
+                f'Top {len(top_sobrestock)} Macropiezas con Mayor Sobrestock',
+                f'Top {len(top_faltante)} Macropiezas con Mayor Faltante',
                 'Distribución del Estado de Inventario',
                 'Productos con Mayor Rotación'
             ),
-            vertical_spacing=0.28,
+            vertical_spacing=0.25,
             horizontal_spacing=0.12,
             specs=[
                 [{"type": "bar"}, {"type": "bar"}],
@@ -224,18 +206,20 @@ class DashboardVisualizations:
             ]
         )
         
-        # === GRÁFICA 1: Top 10 con Mayor Sobrestock ===
-        sobrestock = promedios_macro[promedios_macro['Diferencia'] > 0].nlargest(10, 'Diferencia')
-        if len(sobrestock) > 0:
+        # === GRÁFICA 1: SOBRESTOCK (IGUAL QUE EL AMIGO) ===
+        if not top_sobrestock.empty:
             fig.add_trace(
                 go.Bar(
                     name='Stock Actual',
-                    x=sobrestock['Macropieza'].tolist(),
-                    y=sobrestock['Stock_Actual'].tolist(),
-                    text=[f"{x:.1f}" for x in sobrestock['Stock_Actual']],
-                    textposition='auto',
-                    marker_color='rgb(158,202,225)',
-                    opacity=0.8
+                    x=top_sobrestock['Producto'].tolist(),
+                    y=top_sobrestock['Stock_Actual'].tolist(),
+                    marker_color=colors['sobrestock'],
+                    opacity=0.8,
+                    text=top_sobrestock.apply(
+                        lambda x: f"{((x['Stock_Actual']/x['Promedio_Semanal'])-1)*100:+.0f}%", 
+                        axis=1
+                    ).tolist(),
+                    textposition='outside'
                 ),
                 row=1, col=1
             )
@@ -243,42 +227,29 @@ class DashboardVisualizations:
             fig.add_trace(
                 go.Bar(
                     name='Promedio Semanal',
-                    x=sobrestock['Macropieza'].tolist(),
-                    y=sobrestock['Promedio_Semanal'].tolist(),
-                    text=[f"{x:.1f}" for x in sobrestock['Promedio_Semanal']],
-                    textposition='auto',
-                    marker_color='rgb(161,218,180)',
-                    opacity=0.8
+                    x=top_sobrestock['Producto'].tolist(),
+                    y=top_sobrestock['Promedio_Semanal'].tolist(),
+                    marker_color=colors['stock_normal'],
+                    opacity=0.6,
+                    showlegend=True
                 ),
                 row=1, col=1
             )
-            
-            # Agregar anotaciones con el porcentaje de diferencia
-            for i, (idx, row) in enumerate(sobrestock.iterrows()):
-                porcentaje = (row['Stock_Actual'] / row['Promedio_Semanal'] - 1) * 100 if row['Promedio_Semanal'] > 0 else 0
-                fig.add_annotation(
-                    x=i,
-                    y=max(row['Stock_Actual'], row['Promedio_Semanal']) * 1.1,
-                    text=f"+{porcentaje:.0f}%",
-                    showarrow=True,
-                    arrowhead=2,
-                    yshift=10,
-                    row=1, col=1,
-                    font=dict(size=10, color='red')
-                )
         
-        # === GRÁFICA 2: Top 10 con Mayor Faltante ===
-        faltante = promedios_macro[promedios_macro['Diferencia'] < 0].nsmallest(10, 'Diferencia')
-        if len(faltante) > 0:
+        # === GRÁFICA 2: FALTANTES (IGUAL QUE EL AMIGO) ===
+        if not top_faltante.empty:
             fig.add_trace(
                 go.Bar(
                     name='Stock Actual',
-                    x=faltante['Macropieza'].tolist(),
-                    y=faltante['Stock_Actual'].tolist(),
-                    text=[f"{x:.1f}" for x in faltante['Stock_Actual']],
-                    textposition='auto',
-                    marker_color='rgb(158,202,225)',
+                    x=top_faltante['Producto'].tolist(),
+                    y=top_faltante['Stock_Actual'].tolist(),
+                    marker_color=colors['deficit'],
                     opacity=0.8,
+                    text=top_faltante.apply(
+                        lambda x: f"{((x['Stock_Actual']/x['Promedio_Semanal'])-1)*100:+.0f}%", 
+                        axis=1
+                    ).tolist(),
+                    textposition='outside',
                     showlegend=False
                 ),
                 row=1, col=2
@@ -287,32 +258,16 @@ class DashboardVisualizations:
             fig.add_trace(
                 go.Bar(
                     name='Promedio Semanal',
-                    x=faltante['Macropieza'].tolist(),
-                    y=faltante['Promedio_Semanal'].tolist(),
-                    text=[f"{x:.1f}" for x in faltante['Promedio_Semanal']],
-                    textposition='auto',
-                    marker_color='rgb(161,218,180)',
-                    opacity=0.8,
+                    x=top_faltante['Producto'].tolist(),
+                    y=top_faltante['Promedio_Semanal'].tolist(),
+                    marker_color=colors['stock_normal'],
+                    opacity=0.6,
                     showlegend=False
                 ),
                 row=1, col=2
             )
-            
-            # Agregar anotaciones con el porcentaje de faltante
-            for i, (idx, row) in enumerate(faltante.iterrows()):
-                porcentaje = (row['Stock_Actual'] / row['Promedio_Semanal'] - 1) * 100 if row['Promedio_Semanal'] > 0 else 0
-                fig.add_annotation(
-                    x=i,
-                    y=max(row['Stock_Actual'], row['Promedio_Semanal']) * 1.1,
-                    text=f"{porcentaje:.0f}%",
-                    showarrow=True,
-                    arrowhead=2,
-                    yshift=10,
-                    row=1, col=2,
-                    font=dict(size=10, color='red')
-                )
         
-        # === GRÁFICA 3: Pie Chart (mantener original) ===
+        # === GRÁFICA 3: PIE CHART (MANTENER ORIGINAL) ===
         bajo_promedio = len(self.analisis[self.analisis['Estado'] == 'Bajo Promedio'])
         stock_adecuado = len(self.analisis[self.analisis['Estado'] == 'Stock Adecuado'])
         
@@ -333,11 +288,11 @@ class DashboardVisualizations:
             row=2, col=1
         )
         
-        # === GRÁFICA 4: Top Rotación (mantener original) ===
+        # === GRÁFICA 4: TOP ROTACIÓN (MANTENER ORIGINAL) ===
         if top_rotacion is not None and len(top_rotacion) > 0:
             fig.add_trace(
                 go.Bar(
-                    x=top_rotacion['Producto'].tolist()[:10],  # Limitar a 10
+                    x=top_rotacion['Producto'].tolist()[:10],
                     y=top_rotacion['Num_Ventas'].tolist()[:10],
                     marker_color=colors['stock_normal'],
                     name='Número de Ventas',
@@ -361,6 +316,7 @@ class DashboardVisualizations:
             height=1150,
             showlegend=True,
             template='plotly_white',
+            barmode='group',
             legend=dict(
                 orientation="h",
                 yanchor="bottom",
@@ -373,26 +329,16 @@ class DashboardVisualizations:
             barmode='group'
         )
         
-        # Actualizar ejes
+        # === ACTUALIZAR EJES ===
+        fig.update_xaxes(title_text="Macropieza", tickangle=45, row=1, col=1)
+        fig.update_xaxes(title_text="Macropieza", tickangle=45, row=1, col=2)
         fig.update_yaxes(title_text="Cantidad (kg)", row=1, col=1)
-        fig.update_yaxes(title_text="Cantidad (kg)", row=1, col=2) 
+        fig.update_yaxes(title_text="Cantidad (kg)", row=1, col=2)
+        
+        fig.update_xaxes(title_text="Producto", tickangle=45, row=2, col=2)
         fig.update_yaxes(title_text="Número de Ventas", row=2, col=2)
         
-        # Rotar etiquetas del eje x para mejor legibilidad
-        fig.update_xaxes(tickangle=45, row=1, col=1)
-        fig.update_xaxes(tickangle=45, row=1, col=2)
-        fig.update_xaxes(tickangle=45, row=2, col=2)
-        
-        # Actualizar títulos de ejes y rangos
-        fig.update_xaxes(title_text="Macropieza", row=1, col=1, tickfont=dict(size=10))
-        fig.update_xaxes(title_text="Macropieza", row=1, col=2, tickfont=dict(size=10))
-        fig.update_xaxes(title_text="Producto", row=2, col=2, tickfont=dict(size=10))
-        
-        # Actualizar tamaño de las anotaciones
-        for annotation in fig.layout.annotations:
-            if len(annotation.text.split()) < 4:  # Solo ajustar anotaciones de datos, no títulos
-                annotation.update(font=dict(size=11))
-        
+
         return fig
 
     def _create_dashboard_original(self):
@@ -1419,6 +1365,306 @@ class DashboardVisualizations:
         
         return html
     
+
+    def create_analisis_por_ubicacion(self):
+        """
+        Crea tabla de análisis de stock por ubicación de almacenamiento
+        ACTUALIZADO: Basado en el código del notebook con CAVA 1 y CAVA 2
+        """
+        if not self.has_historical or self.analisis is None:
+            return self._create_empty_chart("No hay datos disponibles para análisis por ubicación")
+        
+        try:
+            print("🔍 Generando análisis por ubicación (CAVA 1 y CAVA 2)...")
+            
+            # === DUPLICAR PRODUCTOS POR CAVA (igual que el notebook) ===
+            analisis = self.analisis.copy()
+            
+            # Crear copias del DataFrame para cada cava
+            analisis_cava1 = analisis.copy()
+            analisis_cava2 = analisis.copy()
+            
+            # Asignar las cavas
+            analisis_cava1['Cava'] = 'CAVA 1'
+            analisis_cava2['Cava'] = 'CAVA 2'
+            
+            # Combinar los DataFrames
+            analisis_combinado = pd.concat([analisis_cava1, analisis_cava2])
+            
+            print(f"  ✅ Productos duplicados: {len(analisis)} → {len(analisis_combinado)}")
+            
+            # === FUNCIÓN PARA CALCULAR ESTADO ===
+            def calcular_estado(row):
+                if pd.isna(row['Promedio_Semanal']) or row['Promedio_Semanal'] == 0:
+                    return 'Sin Ventas'
+                
+                semanas_stock = row['Stock_Actual'] / row['Promedio_Semanal'] if row['Promedio_Semanal'] > 0 else float('inf')
+                
+                if row['Cava'] == 'CAVA 1':  # Congelado
+                    if semanas_stock >= 4:
+                        return 'Sobre Stock'
+                    elif semanas_stock > 0:
+                        return 'Stock Adecuado'
+                    else:
+                        return 'Stock Bajo'
+                else:  # CAVA 2 (Refrigeración)
+                    if semanas_stock >= 0.4:
+                        return 'Sobre Stock'
+                    elif semanas_stock > 0:
+                        return 'Stock Adecuado'
+                    else:
+                        return 'Stock Bajo'
+            
+            # === PREPARAR DATOS PARA LA TABLA ===
+            tabla_stock = analisis_combinado.copy()
+            tabla_stock['Semanas_de_Stock'] = tabla_stock.apply(
+                lambda row: row['Stock_Actual'] / row['Promedio_Semanal'] if row['Promedio_Semanal'] > 0 else float('inf'),
+                axis=1
+            )
+            tabla_stock['Estado'] = tabla_stock.apply(calcular_estado, axis=1)
+            
+            # Ordenar la tabla por Cava y Stock Actual
+            tabla_stock = tabla_stock.sort_values(['Cava', 'Stock_Actual'], ascending=[True, False])
+            
+            # === ESTILOS CSS ===
+            tabla_style = """
+            <style>
+                .stock-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 25px 0;
+                    font-size: 14px;
+                    font-family: Arial, sans-serif;
+                    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+                    background-color: #1a1a2e;
+                    color: white;
+                }
+                .stock-table thead tr {
+                    background-color: #2d2d44;
+                    color: white;
+                    text-align: left;
+                }
+                .stock-table th,
+                .stock-table td {
+                    padding: 12px 15px;
+                    border-bottom: 1px solid #3f3f5f;
+                }
+                .sobre-stock {
+                    background-color: #7c1d1d !important;
+                }
+                .stock-bajo {
+                    background-color: #614a1f !important;
+                }
+                .stock-adecuado {
+                    background-color: #1f4937 !important;
+                }
+                .sin-ventas {
+                    background-color: #2d2d44 !important;
+                }
+                .cava-header {
+                    background-color: #2d2d44;
+                    color: white;
+                    padding: 10px 15px;
+                    font-weight: bold;
+                    text-align: left;
+                }
+            </style>
+            """
+            
+            # === FUNCIÓN PARA OBTENER CLASE CSS ===
+            def get_row_class(estado):
+                if estado == 'Sobre Stock':
+                    return 'sobre-stock'
+                elif estado == 'Stock Bajo':
+                    return 'stock-bajo'
+                elif estado == 'Stock Adecuado':
+                    return 'stock-adecuado'
+                else:
+                    return 'sin-ventas'
+            
+            # === CREAR HTML DE LA TABLA ===
+            html_rows = []
+            headers = ['Código', 'Producto', 'Ubicación', 'Stock Actual (kg)', 'Prom. Ventas/Sem (kg)', 'Semanas de Stock', 'Estado']
+            
+            html_rows.append("<thead><tr>")
+            for header in headers:
+                html_rows.append(f"<th>{header}</th>")
+            html_rows.append("</tr></thead>")
+            
+            cava_actual = None
+            html_rows.append("<tbody>")
+            
+            for _, row in tabla_stock.iterrows():
+                if cava_actual != row['Cava']:
+                    cava_actual = row['Cava']
+                    tipo_almacen = "Congelado" if cava_actual == 'CAVA 1' else "Refrigeración"
+                    html_rows.append(f'<tr><td colspan="7" class="cava-header">{tipo_almacen} ({cava_actual})</td></tr>')
+                
+                row_class = get_row_class(row['Estado'])
+                html_rows.append(f"<tr class='{row_class}'>")
+                
+                codigo = row.get('Codigo', 'N/A')
+                producto = row['Producto']
+                tipo_almacen = "Congelado" if row['Cava'] == 'CAVA 1' else "Refrigeración"
+                ubicacion = f"{tipo_almacen} ({row['Cava']})"
+                stock_actual = f"{row['Stock_Actual']:.1f}"
+                promedio = f"{row['Promedio_Semanal']:.1f}"
+                semanas = 'Sin datos' if row['Semanas_de_Stock'] == float('inf') else f"{row['Semanas_de_Stock']:.1f}"
+                estado = row['Estado']
+                
+                html_rows.append(f"<td>{codigo}</td>")
+                html_rows.append(f"<td>{producto}</td>")
+                html_rows.append(f"<td>{ubicacion}</td>")
+                html_rows.append(f"<td>{stock_actual}</td>")
+                html_rows.append(f"<td>{promedio}</td>")
+                html_rows.append(f"<td>{semanas}</td>")
+                html_rows.append(f"<td>{estado}</td>")
+                html_rows.append("</tr>")
+            
+            html_rows.append("</tbody>")
+            
+            html_table = f"""
+            {tabla_style}
+            <div style="margin: 20px 0;">
+                <h2 style="color: white; margin-bottom: 20px;">🏬 Análisis por Ubicación de Almacenamiento</h2>
+                <table class="stock-table">
+                    {''.join(html_rows)}
+                </table>
+            </div>
+            """
+            
+            fig = go.Figure()
+            fig.update_layout(
+                height=100,
+                margin=dict(t=0, b=0, l=0, r=0),
+                xaxis=dict(visible=False),
+                yaxis=dict(visible=False),
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)'
+            )
+            
+            return fig, html_table
+            
+        except Exception as e:
+            print(f"❌ Error en análisis por ubicación: {e}")
+            import traceback
+            traceback.print_exc()
+            return self._create_empty_chart("Error al generar análisis por ubicación"), ""
+
+    def _get_estado_color(self, estado):
+        """Retorna el color para cada estado en la tabla"""
+        colores = {
+            'Sobre Stock': 'rgba(255, 50, 50, 0.3)',
+            'Stock Bajo': 'rgba(255, 150, 50, 0.3)',
+            'Stock Adecuado': 'rgba(50, 255, 50, 0.3)',
+            'Sin Ventas': 'rgba(150, 150, 150, 0.3)'
+        }
+        return colores.get(estado, 'rgb(50, 50, 70)')
+
+    def _generar_resumen_ubicacion(self, analisis_stock):
+        """Genera HTML con resumen estadístico por ubicación"""
+        try:
+            # Agrupar por ubicación y estado
+            resumen = analisis_stock.groupby(['tipo_almacenamiento', 'Estado_Almacenamiento']).size().unstack(fill_value=0)
+            
+            # Productos en ambas ubicaciones
+            productos_duplicados = analisis_stock[analisis_stock.duplicated(subset=['Codigo'], keep=False)]
+            
+            # Identificar sobre stock
+            sobre_stock = analisis_stock[analisis_stock['Estado_Almacenamiento'] == 'Sobre Stock'].head(5)
+            stock_bajo = analisis_stock[analisis_stock['Estado_Almacenamiento'] == 'Stock Bajo'].head(5)
+            
+            html = f"""
+            <div style="background: rgb(30, 30, 50); color: white; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                <h3 style="color: #667eea; margin-bottom: 20px;">📊 Resumen por Ubicación y Estado</h3>
+                
+                <!-- Tabla de resumen -->
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px;">
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #3498DB; margin-bottom: 10px;">CAVA 1 (Congelado)</h4>
+                        <ul style="list-style: none; padding: 0;">
+            """
+            
+            if 'Congelado (CAVA 1)' in resumen.index:
+                for estado, cantidad in resumen.loc['Congelado (CAVA 1)'].items():
+                    if cantidad > 0:
+                        html += f'<li style="margin: 5px 0;">• {estado}: <strong>{cantidad}</strong> productos</li>'
+            
+            html += """
+                        </ul>
+                    </div>
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #E74C3C; margin-bottom: 10px;">CAVA 2 (Refrigerado)</h4>
+                        <ul style="list-style: none; padding: 0;">
+            """
+            
+            if 'Refrigerado (CAVA 2)' in resumen.index:
+                for estado, cantidad in resumen.loc['Refrigerado (CAVA 2)'].items():
+                    if cantidad > 0:
+                        html += f'<li style="margin: 5px 0;">• {estado}: <strong>{cantidad}</strong> productos</li>'
+            
+            html += """
+                        </ul>
+                    </div>
+                </div>
+            """
+            
+            # Alertas de sobre stock
+            if len(sobre_stock) > 0:
+                html += """
+                <div style="background: rgba(255, 50, 50, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="color: #FF6B6B;">⚠️ Productos con Sobre Stock</h4>
+                    <ul style="margin-top: 10px;">
+                """
+                for _, row in sobre_stock.iterrows():
+                    semanas = row['Semanas_Stock'] if row['Semanas_Stock'] > 0 else 'N/A'
+                    html += f"""
+                        <li style="margin: 5px 0;">
+                            {row['Producto']} ({row['Ubicacion']}): 
+                            <strong>{row['Stock_Actual']:.1f} kg</strong> 
+                            - {semanas} semanas de stock
+                        </li>
+                    """
+                html += "</ul></div>"
+            
+            # Alertas de stock bajo
+            if len(stock_bajo) > 0:
+                html += """
+                <div style="background: rgba(255, 150, 50, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="color: #FFA500;">🔴 Productos con Stock Bajo</h4>
+                    <ul style="margin-top: 10px;">
+                """
+                for _, row in stock_bajo.iterrows():
+                    deficit = row['Promedio_Semanal'] - row['Stock_Actual']
+                    html += f"""
+                        <li style="margin: 5px 0;">
+                            {row['Producto']} ({row['Ubicacion']}): 
+                            <strong>{row['Stock_Actual']:.1f} kg</strong> 
+                            - Déficit: {deficit:.1f} kg
+                        </li>
+                    """
+                html += "</ul></div>"
+            
+            # Productos duplicados
+            if len(productos_duplicados) > 0:
+                html += """
+                <div style="background: rgba(102, 126, 234, 0.1); padding: 15px; border-radius: 8px;">
+                    <h4 style="color: #667eea;">📍 Productos en Múltiples Ubicaciones</h4>
+                    <p style="margin-top: 10px; color: #aaa;">
+                """
+                productos_unicos = productos_duplicados['Producto'].unique()[:5]
+                html += f"Se encontraron {len(productos_unicos)} productos en ambas cavas: "
+                html += ", ".join(productos_unicos)
+                html += "</p></div>"
+            
+            html += "</div>"
+            
+            return html
+            
+        except Exception as e:
+            print(f"⚠️ Error generando resumen: {e}")
+            return ""
+
     def _create_empty_chart(self, message):
         """Crea gráfico vacío con mensaje"""
         fig = go.Figure()
