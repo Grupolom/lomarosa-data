@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Recordatorios de Pago - Cartera</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            padding: 2rem;
+            line-height: 1.4;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 1.4rem;
+            color: #38bdf8;
+        }
+
+        .card {
+            background: #1e253a;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 20px 40px rgb(0 0 0 / 0.6);
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #e2e8f0;
+            display: block;
+            margin-bottom: 0.4rem;
+        }
+
+        input[type="file"] {
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            padding: 0.6rem 0.8rem;
+            width: 100%;
+            color: #f8fafc;
+            font-size: 0.9rem;
+        }
+
+        button {
+            background: #38bdf8;
+            color: #0f172a;
+            font-weight: 600;
+            border: 0;
+            border-radius: 8px;
+            padding: 0.7rem 1rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        button:disabled {
+            background: #475569;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+        }
+
+        th,
+        td {
+            border: 1px solid #475569;
+            padding: 0.5rem 0.6rem;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #1e293b;
+            color: #7dd3fc;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+        }
+
+        .footer-note {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 2rem;
+        }
+
+        .warning {
+            color: #facc15;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Recordatorios de Pago · Cartera Preventiva</h1>
+
+    <div class="card">
+        <label for="fileClientes">1. Subir Excel de Proveedores (hoja que contiene datos de NIT / condición de pago /
+            correo)</label>
+        <input type="file" id="fileClientes" accept=".xlsx,.xls" />
+        <div class="warning">
+            Usamos columnas reales (no las filas de instrucciones):<br>
+            - NIT o Cédula/NIT<br>
+            - Condición de pago (ej. "Treinta dias", "Quince dias", "Contado", etc.)<br>
+            - Mail contacto / Correo<br>
+            El script detecta automáticamente qué fila es el header real.
+        </div>
+    </div>
+
+    <div class="card">
+        <label for="fileFacturas">2. Subir Excel de Facturas / Consolidado (hoja "Sheet1")</label>
+        <input type="file" id="fileFacturas" accept=".xlsx,.xls" />
+        <div class="warning">
+            De esa hoja usamos:<br>
+            - Nit<br>
+            - Documento (número de factura)<br>
+            - Fecha (emisión)<br>
+            - Vlr Neto2 (valor de cada línea)<br>
+            El código suma todas las líneas con la misma factura para dar el valor total.
+        </div>
+    </div>
+
+    <div class="card">
+        <button id="processBtn" disabled>3. Procesar y generar recordatorios</button>
+        <div id="status" class="warning"></div>
+    </div>
+
+    <div class="card" id="resultsCard" style="display:none;">
+        <h2 style="color:#7dd3fc; font-size:1rem; margin-top:0;">Facturas que necesitan recordatorio (vencen pronto)
+        </h2>
+        <table id="resultsTable">
+            <thead>
+                <tr>
+                    <th>Correo destino</th>
+                    <th>NIT</th>
+                    <th>Factura</th>
+                    <th>Fecha factura</th>
+                    <th>Vencimiento</th>
+                    <th>Recordar el</th>
+                    <th>Valor total factura</th>
+                    <th>Mensaje correo</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button id="downloadBtn">Descargar CSV para Power Automate</button>
+    </div>
+
+    <div class="footer-note">
+        Todo corre local en tu navegador. Después subes el CSV a SharePoint/Cartera para que Power Automate dispare
+        correos.
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+
+    <script>
+        // ======================
+        // UTILIDADES
+        // ======================
+
+        function cleanStr(v) {
+            if (v === null || v === undefined) return "";
+            return String(v).trim();
+        }
+
+        function cleanLower(v) {
+            return cleanStr(v).toLowerCase();
+        }
+
+        function cleanNIT(v) {
+            return cleanLower(v);
+        }
+
+        // Convierte "Treinta dias", "Quince dias", "Contado", "Un Dia", "Ocho Dias"
+        // en número de días de crédito.
+        function plazoDiasFromTexto(raw) {
+            const t0 = cleanLower(raw)
+                .replace("días", "dias")
+                .replace("día", "dia")
+                .replace("treinta", "30")
+                .replace("quince", "15")
+                .replace("veinte", "20")
+                .replace("cuarenta y cinco", "45")
+                .replace("sesenta", "60")
+                .replace("ocho", "8")
+                .replace("cuatro", "4")
+                .replace("un dia", "1 dia")
+                .replace("una dia", "1 dia");
+
+            if (t0.includes("contado")) return 0;
+            if (t0.includes("1 dia")) return 1;
+
+            const match = t0.match(/(\d+)\s*dia/);
+            if (match) {
+                const n = parseInt(match[1], 10);
+                if (!isNaN(n)) return n;
+            }
+
+            return 0;
+        }
+
+        // convierte valor Excel en dayjs
+        // soporta Date, número serial excel, string con fecha
+        function parseExcelDate(value) {
+            if (!value) return null;
+
+            if (value instanceof Date) {
+                return dayjs(value);
+            }
+
+            if (typeof value === "number") {
+                const excelEpoch = dayjs("1899-12-30");
+                return excelEpoch.add(value, "day");
+            }
+
+            const parsed = dayjs(value);
+            if (parsed.isValid()) return parsed;
+
+            return null;
+        }
+
+        // leer archivo excel a workbook
+        function readWorkbook(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const wb = XLSX.read(data, { type: "array" });
+                        resolve(wb);
+                    } catch (err) {
+                        reject(err);
+                    }
+                };
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        // ======================
+        // PARSE PROVEEDORES
+        //
+        // El archivo tiene muchas filas de instrucciones antes de la tabla real.
+        // Necesitamos detectar dinámicamente cuál fila es el header
+        // donde aparecen: NIT / crédito a X días / correo
+        //
+        // Salida:
+        //   clientesMap[nit] = {
+        //      correo: string,
+        //      plazoDias: number
+        //   }
+        // ======================
+        function parseClientesWorkbook(wb) {
+            console.log("Hojas en proveedores:", wb.SheetNames);
+
+            // buscamos hoja cuyo nombre contenga "prove"
+            let proveedoresSheetName = wb.SheetNames.find(n => cleanLower(n).includes("prove"));
+            if (!proveedoresSheetName) {
+                throw new Error("No encuentro hoja de proveedores (ej. 'Proveedores'). Hojas disponibles: " + wb.SheetNames.join(", "));
+            }
+
+            const ws = wb.Sheets[proveedoresSheetName];
+
+            // leemos todas las filas sin asumir header
+            const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+            console.log("Total filas Proveedores:", rows.length);
+            console.log("Primeras 15 filas Proveedores:", rows.slice(0, 15));
+
+            // detectar fila de encabezados reales
+            // regla: la fila debe mencionar nit/cedula, credito/dias, y mail/correo
+            let headerRowIndex = -1;
+            for (let i = 0; i < rows.length; i++) {
+                const candidate = rows[i].map(c => cleanLower(c));
+                const joined = candidate.join(" | ");
+                if (
+                    (joined.includes("nit") || joined.includes("cédula") || joined.includes("cedula")) &&
+                    (joined.includes("credito") || joined.includes("crédito") || joined.includes("contado") || joined.includes("dias")) &&
+                    (joined.includes("mail") || joined.includes("correo"))
+                ) {
+                    headerRowIndex = i;
+                    break;
+                }
+            }
+
+            if (headerRowIndex === -1) {
+                throw new Error("No pude detectar la fila de encabezados reales en Proveedores. Revisa que existan columnas tipo NIT / crédito a X días / correo.");
+            }
+
+            const headers = rows[headerRowIndex];
+            const dataRows = rows.slice(headerRowIndex + 1);
+
+            console.log("Fila de encabezado detectada (index):", headerRowIndex);
+            console.log("Headers detectados Proveedores:", headers);
+
+            // localizar índices de columnas clave
+            // NIT: algo que tenga "nit" o "cédula"/"cedula"
+            const idxNit = headers.findIndex(h => {
+                const hh = cleanLower(h);
+                return hh.includes("nit") || hh.includes("cédula") || hh.includes("cedula");
+            });
+
+            // CONDICION DE PAGO: "credito", "contado", "dias"
+            const idxCond = headers.findIndex(h => {
+                const hh = cleanLower(h);
+                return (
+                    hh.includes("credito") ||
+                    hh.includes("crédito") ||
+                    hh.includes("contado") ||
+                    hh.includes("dias")
+                );
+            });
+
+            // Correo: "mail" o "correo"
+            const idxMail = headers.findIndex(h => {
+                const hh = cleanLower(h);
+                return hh.includes("mail") || hh.includes("correo");
+            });
+
+            console.log("idxNit:", idxNit, "idxCond:", idxCond, "idxMail:", idxMail);
+
+            if (idxNit === -1 || idxCond === -1 || idxMail === -1) {
+                throw new Error(
+                    "No pude mapear NIT / Condición de pago / Correo después de detectar encabezado. Headers detectados: " +
+                    JSON.stringify(headers)
+                );
+            }
+
+            // construir diccionario de clientes
+            const clientes = {};
+
+            dataRows.forEach(row => {
+                const nitRaw = row[idxNit];
+                if (!nitRaw) return;
+
+                const nitNorm = cleanNIT(nitRaw);
+                const condicion = row[idxCond];
+                const correo = row[idxMail];
+
+                if (!nitNorm && !correo) return;
+
+                clientes[nitNorm] = {
+                    correo: cleanStr(correo),
+                    plazoDias: plazoDiasFromTexto(condicion),
+                };
+            });
+
+            console.log("clientesMap construido:", clientes);
+
+            return clientes;
+        }
+
+        // ======================
+        // PARSE FACTURAS (CONSOLIDADO)
+        //
+        // Hoja: "Sheet1"
+        // Columnas importantes por línea:
+        //   Nit
+        //   Documento (número de factura)
+        //   Fecha
+        //   Vlr Neto2 (valor línea)
+        //
+        // Devuelve TODAS las líneas crudas.
+        // ======================
+        function parseFacturasWorkbook(wb) {
+            console.log("Hojas en consolidado:", wb.SheetNames);
+
+            let facturasSheetName = wb.SheetNames.find(n =>
+                cleanLower(n) === "sheet1" ||
+                cleanLower(n) === "sheet 1" ||
+                cleanLower(n).includes("sheet")
+            );
+            if (!facturasSheetName) {
+                throw new Error("No encuentro hoja de facturas (ej. 'Sheet1'). Hojas disponibles: " + wb.SheetNames.join(", "));
+            }
+
+            const ws = wb.Sheets[facturasSheetName];
+            const rows = XLSX.utils.sheet_to_json(ws, { defval: "" });
+
+            console.log("Primeras filas Facturas:", rows.slice(0, 4));
+
+            if (!rows.length) {
+                throw new Error("El archivo de Facturas no tiene filas.");
+            }
+
+            const facturasRaw = rows.map(r => {
+                const nitVal =
+                    r["Nit"] || r["NIT"] || r["nit"] || r["NIT "] || r["Nit "] || "";
+
+                const facturaVal =
+                    r["Documento"] || r["documento"] || r["Documento "] || "";
+
+                const fechaVal =
+                    r["Fecha"] || r["fecha"] || r["FECHA"] || r["Fecha "] || "";
+
+                let valorBruto = (
+                    r["Vlr Neto2"] ||
+                    r["Vlr Neto 2"] ||
+                    r["Vlr Neto"] ||
+                    r["Vlr Neto "] ||
+                    r["Valor"] ||
+                    r["VALOR"] ||
+                    r["valor"] ||
+                    ""
+                );
+
+                // normalizar valor numérico
+                if (typeof valorBruto === "string") {
+                    // quitamos puntos de miles, cambiamos coma decimal a punto
+                    valorBruto = valorBruto.replace(/\./g, "").replace(/,/g, ".");
+                }
+                const valorNum = Number(valorBruto) || 0;
+
+                return {
+                    nit: cleanNIT(nitVal),
+                    numero_factura: cleanStr(facturaVal),
+                    fecha_factura: parseExcelDate(fechaVal), // dayjs
+                    valor_linea: valorNum,
+                    pagada: "no"
+                };
+            });
+
+            console.log("Facturas crudas parseadas (primeras 5):", facturasRaw.slice(0, 5));
+
+            return facturasRaw;
+        }
+
+        // ======================
+        // AGRUPAR POR FACTURA
+        //
+        // Agrupa facturasRaw por (nit, numero_factura)
+        // Suma valor_linea -> valor_total
+        // Mantiene la primera fecha_factura válida encontrada.
+        // ======================
+        function consolidarFacturasPorDocumento(facturasRaw) {
+            const bucket = {};
+
+            facturasRaw.forEach(f => {
+                if (!f.nit || !f.numero_factura) return;
+
+                const key = f.nit + "||" + f.numero_factura;
+
+                if (!bucket[key]) {
+                    bucket[key] = {
+                        nit: f.nit,
+                        numero_factura: f.numero_factura,
+                        fecha_factura: f.fecha_factura, // dayjs
+                        valor_total: 0,
+                        pagada: f.pagada || "no"
+                    };
+                }
+
+                bucket[key].valor_total += Number(f.valor_linea) || 0;
+
+                // si no teníamos fecha o la anterior no era válida, y esta sí lo es -> usamos esta
+                if (
+                    (!bucket[key].fecha_factura || !bucket[key].fecha_factura.isValid()) &&
+                    f.fecha_factura &&
+                    f.fecha_factura.isValid()
+                ) {
+                    bucket[key].fecha_factura = f.fecha_factura;
+                }
+            });
+
+            const lista = Object.values(bucket);
+            console.log("Facturas consolidadas:", lista.slice(0, 5));
+            return lista;
+        }
+
+        // ======================
+        // BUILD RECORDATORIOS
+        //
+        // Para cada factura consolidada:
+        // - encontramos su cliente por NIT
+        // - calculamos vencimiento = fecha_factura + plazoDias
+        // - recordatorio = vencimiento - 3 días
+        // - incluimos si estamos en ventana (hoy..hoy+3)
+        //
+        // Salida final: lo que va a tabla y CSV
+        // ======================
+        function buildRecordatorios(clientesMap, facturasConsolidadas) {
+            const hoy = dayjs().startOf("day");
+            const out = [];
+
+            facturasConsolidadas.forEach(f => {
+                if (!f.nit || !clientesMap[f.nit]) return;
+                if (!f.fecha_factura || !f.fecha_factura.isValid()) return;
+
+                const plazo = clientesMap[f.nit].plazoDias || 0;
+
+                const fechaVenc = f.fecha_factura.add(plazo, "day");
+                const fechaRecordatorio = fechaVenc.subtract(3, "day");
+
+                // ventana operativa: avisar si faltan entre 0 y 3 días
+                const diffDias = fechaRecordatorio.diff(hoy, "day");
+                if (diffDias < 0 || diffDias > 3) {
+                    return;
+                }
+
+                const valorCOP = f.valor_total.toLocaleString("es-CO", {
+                    style: "currency",
+                    currency: "COP"
+                });
+
+                const mensaje = [
+                    "Buen día,\n\n",
+                    `Este es un recordatorio de pago para la factura ${f.numero_factura}, `,
+                    `emitida el ${f.fecha_factura.format("YYYY-MM-DD")} `,
+                    `con vencimiento el ${fechaVenc.format("YYYY-MM-DD")}.\n\n`,
+                    `Valor pendiente: ${valorCOP}.\n\n`,
+                    "Agradecemos realizar el pago oportunamente.\n\n",
+                    "Saludos,\nLomarosa."
+                ].join("");
+
+                out.push({
+                    correo: clientesMap[f.nit].correo,
+                    nit: f.nit,
+                    numero_factura: f.numero_factura,
+                    fecha_factura: f.fecha_factura.format("YYYY-MM-DD"),
+                    fecha_vencimiento: fechaVenc.format("YYYY-MM-DD"),
+                    fecha_recordatorio: fechaRecordatorio.format("YYYY-MM-DD"),
+                    valor_factura: valorCOP,
+                    mensaje_correo: mensaje
+                });
+            });
+
+            console.log("Recordatorios generados:", out);
+
+            return out;
+        }
+
+        // ======================
+        // RENDER EN TABLA
+        // ======================
+        function renderResults(rows) {
+            const card = document.getElementById("resultsCard");
+            const tbody = document.querySelector("#resultsTable tbody");
+            tbody.innerHTML = "";
+
+            if (!rows.length) {
+                tbody.innerHTML = `<tr><td colspan="8" style="color:#94a3b8;">No hay recordatorios en ventana (hoy +3 días).</td></tr>`;
+                card.style.display = "block";
+                return;
+            }
+
+            rows.forEach(r => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+          <td>${r.correo || ""}</td>
+          <td>${r.nit || ""}</td>
+          <td>${r.numero_factura || ""}</td>
+          <td>${r.fecha_factura || ""}</td>
+          <td>${r.fecha_vencimiento || ""}</td>
+          <td>${r.fecha_recordatorio || ""}</td>
+          <td>${r.valor_factura || ""}</td>
+          <td style="white-space:pre-line;">${r.mensaje_correo || ""}</td>
+        `;
+                tbody.appendChild(tr);
+            });
+
+            card.style.display = "block";
+        }
+
+        // ======================
+        // DESCARGAR CSV
+        // ======================
+        function downloadCSV(records) {
+            // Definir encabezados correctos
+            const headers = [
+                "correo",
+                "nit",
+                "numero_factura",
+                "fecha_factura",
+                "fecha_vencimiento",
+                "fecha_recordatorio",
+                "valor_factura"
+            ];
+
+            // Crear contenido del CSV (sin mensaje ni saltos)
+            const csvContent = [
+                headers.join(","),
+                ...records.map(rec => [
+                    rec.correo,
+                    rec.nit,
+                    rec.numero_factura,
+                    rec.fecha_factura,
+                    rec.fecha_vencimiento,
+                    rec.fecha_recordatorio,
+                    rec.valor_factura
+                ].join(","))
+            ].join("\n");
+
+            // Descargar CSV limpio
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "recordatorios_lomarosa.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+
+        // ======================
+        // WIRING UI
+        // ======================
+
+        let fileClientesObj = null;
+        let fileFacturasObj = null;
+        let resultadosGlobal = [];
+
+        const fileClientesInput = document.getElementById("fileClientes");
+        const fileFacturasInput = document.getElementById("fileFacturas");
+        const processBtn = document.getElementById("processBtn");
+        const statusEl = document.getElementById("status");
+        const downloadBtn = document.getElementById("downloadBtn");
+
+        fileClientesInput.addEventListener("change", e => {
+            fileClientesObj = e.target.files[0] || null;
+            checkReady();
+        });
+
+        fileFacturasInput.addEventListener("change", e => {
+            fileFacturasObj = e.target.files[0] || null;
+            checkReady();
+        });
+
+        function checkReady() {
+            if (fileClientesObj && fileFacturasObj) {
+                processBtn.disabled = false;
+                statusEl.textContent = "";
+            } else {
+                processBtn.disabled = true;
+                statusEl.textContent = "Sube ambos archivos para continuar.";
+            }
+        }
+
+        processBtn.addEventListener("click", async () => {
+            statusEl.textContent = "Procesando...";
+            try {
+                // leer ambos excels
+                const wbClientes = await readWorkbook(fileClientesObj);
+                const wbFacturas = await readWorkbook(fileFacturasObj);
+
+                // 1. clientes (NIT -> correo y plazoDias)
+                const clientesMap = parseClientesWorkbook(wbClientes);
+
+                // 2. facturas línea a línea
+                const facturasRaw = parseFacturasWorkbook(wbFacturas);
+
+                // 3. agrupar por (NIT, factura) y sumar Vlr Neto2
+                const facturasConsolidadas = consolidarFacturasPorDocumento(facturasRaw);
+
+                // 4. calcular vencimientos y filtrar las que hay que notificar
+                resultadosGlobal = buildRecordatorios(clientesMap, facturasConsolidadas);
+
+                // 5. pintar tabla
+                renderResults(resultadosGlobal);
+
+                statusEl.textContent = "Listo ✅ revisa los recordatorios abajo.";
+            } catch (err) {
+                console.error("ERROR EN PROCESO >>>", err);
+                statusEl.textContent = "Error leyendo archivos: " + err.message;
+            }
+        });
+
+        downloadBtn.addEventListener("click", () => {
+            downloadCSV(resultadosGlobal);
+        });
+    </script>
+</body>
+
+</html>

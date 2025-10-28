@@ -1,0 +1,11 @@
+correo,nit,numero_factura,fecha_factura,fecha_vencimiento,fecha_recordatorio,valor_factura,mensaje_correo
+cliente@empresa.com,900123456,FC-2025-001,2025-10-20,2025-11-19,2025-11-16,2500000,"Buen día,
+
+Este es un recordatorio de pago para la factura FC-2025-001, emitida el 2025-10-20 con vencimiento el 2025-11-19.
+
+Valor pendiente: $2.500.000.
+
+Agradecemos realizar el pago oportunamente.
+
+Saludos,
+Cartera."

@@ -211,8 +211,8 @@ class DashboardVisualizations:
         fig = make_subplots(
             rows=2, cols=2,
             subplot_titles=(
-                'Top 10 Macropiezas: Diferencias más Significativas',
-                'Top 10 Macropiezas: Mayor Stock vs Promedio', 
+                'Top 10 Macropiezas con Mayor Sobrestock',
+                'Top 10 Macropiezas con Mayor Faltante', 
                 'Distribución del Estado de Inventario',
                 'Productos con Mayor Rotación'
             ),
@@ -224,16 +224,17 @@ class DashboardVisualizations:
             ]
         )
         
-        # === GRÁFICA 1: Stock actual vs Promedio de ventas (por diferencias) ===
-        if len(top_diferencias) > 0:
+        # === GRÁFICA 1: Top 10 con Mayor Sobrestock ===
+        sobrestock = promedios_macro[promedios_macro['Diferencia'] > 0].nlargest(10, 'Diferencia')
+        if len(sobrestock) > 0:
             fig.add_trace(
                 go.Bar(
                     name='Stock Actual',
-                    x=top_diferencias['Macropieza'].tolist(),
-                    y=top_diferencias['Stock_Actual'].tolist(),
-                    text=[f"{x:.1f}" for x in top_diferencias['Stock_Actual']],
+                    x=sobrestock['Macropieza'].tolist(),
+                    y=sobrestock['Stock_Actual'].tolist(),
+                    text=[f"{x:.1f}" for x in sobrestock['Stock_Actual']],
                     textposition='auto',
-                    marker_color='lightblue',
+                    marker_color='rgb(158,202,225)',
                     opacity=0.8
                 ),
                 row=1, col=1
@@ -242,39 +243,41 @@ class DashboardVisualizations:
             fig.add_trace(
                 go.Bar(
                     name='Promedio Semanal',
-                    x=top_diferencias['Macropieza'].tolist(),
-                    y=top_diferencias['Promedio_Semanal'].tolist(),
-                    text=[f"{x:.1f}" for x in top_diferencias['Promedio_Semanal']],
+                    x=sobrestock['Macropieza'].tolist(),
+                    y=sobrestock['Promedio_Semanal'].tolist(),
+                    text=[f"{x:.1f}" for x in sobrestock['Promedio_Semanal']],
                     textposition='auto',
-                    marker_color='lightgreen',
+                    marker_color='rgb(161,218,180)',
                     opacity=0.8
                 ),
                 row=1, col=1
             )
             
             # Agregar anotaciones con el porcentaje de diferencia
-            for i, (idx, row) in enumerate(top_diferencias.iterrows()):
+            for i, (idx, row) in enumerate(sobrestock.iterrows()):
+                porcentaje = (row['Stock_Actual'] / row['Promedio_Semanal'] - 1) * 100 if row['Promedio_Semanal'] > 0 else 0
                 fig.add_annotation(
                     x=i,
                     y=max(row['Stock_Actual'], row['Promedio_Semanal']) * 1.1,
-                    text=f"{row['Porcentaje_Diferencia']:+.0f}%",
+                    text=f"+{porcentaje:.0f}%",
                     showarrow=True,
                     arrowhead=2,
                     yshift=10,
                     row=1, col=1,
-                    font=dict(size=10, color='red' if row['Diferencia'] < 0 else 'green')
+                    font=dict(size=10, color='red')
                 )
         
-        # === GRÁFICA 2: Stock vs promedio (por ratios) ===
-        if len(top_sobre_promedio) > 0:
+        # === GRÁFICA 2: Top 10 con Mayor Faltante ===
+        faltante = promedios_macro[promedios_macro['Diferencia'] < 0].nsmallest(10, 'Diferencia')
+        if len(faltante) > 0:
             fig.add_trace(
                 go.Bar(
                     name='Stock Actual',
-                    x=top_sobre_promedio['Macropieza'].tolist(),
-                    y=top_sobre_promedio['Stock_Actual'].tolist(),
-                    text=[f"{x:.1f}" for x in top_sobre_promedio['Stock_Actual']],
+                    x=faltante['Macropieza'].tolist(),
+                    y=faltante['Stock_Actual'].tolist(),
+                    text=[f"{x:.1f}" for x in faltante['Stock_Actual']],
                     textposition='auto',
-                    marker_color='lightblue',
+                    marker_color='rgb(158,202,225)',
                     opacity=0.8,
                     showlegend=False
                 ),
@@ -284,28 +287,29 @@ class DashboardVisualizations:
             fig.add_trace(
                 go.Bar(
                     name='Promedio Semanal',
-                    x=top_sobre_promedio['Macropieza'].tolist(),
-                    y=top_sobre_promedio['Promedio_Semanal'].tolist(),
-                    text=[f"{x:.1f}" for x in top_sobre_promedio['Promedio_Semanal']],
+                    x=faltante['Macropieza'].tolist(),
+                    y=faltante['Promedio_Semanal'].tolist(),
+                    text=[f"{x:.1f}" for x in faltante['Promedio_Semanal']],
                     textposition='auto',
-                    marker_color='lightgreen',
+                    marker_color='rgb(161,218,180)',
                     opacity=0.8,
                     showlegend=False
                 ),
                 row=1, col=2
             )
             
-            # Agregar anotaciones con el ratio de stock sobre promedio
-            for i, (idx, row) in enumerate(top_sobre_promedio.iterrows()):
+            # Agregar anotaciones con el porcentaje de faltante
+            for i, (idx, row) in enumerate(faltante.iterrows()):
+                porcentaje = (row['Stock_Actual'] / row['Promedio_Semanal'] - 1) * 100 if row['Promedio_Semanal'] > 0 else 0
                 fig.add_annotation(
                     x=i,
                     y=max(row['Stock_Actual'], row['Promedio_Semanal']) * 1.1,
-                    text=f"{row['Ratio_Stock_Promedio']:.1f}x",
+                    text=f"{porcentaje:.0f}%",
                     showarrow=True,
                     arrowhead=2,
                     yshift=10,
                     row=1, col=2,
-                    font=dict(size=10, color='blue')
+                    font=dict(size=10, color='red')
                 )
         
         # === GRÁFICA 3: Pie Chart (mantener original) ===
@@ -365,7 +369,8 @@ class DashboardVisualizations:
                 x=1
             ),
             font=dict(family="Arial", size=11, color=colors['text']),
-            margin=dict(t=120, b=60, l=40, r=40)
+            margin=dict(t=120, b=60, l=40, r=40),
+            barmode='group'
         )
         
         # Actualizar ejes
@@ -378,10 +383,10 @@ class DashboardVisualizations:
         fig.update_xaxes(tickangle=45, row=1, col=2)
         fig.update_xaxes(tickangle=45, row=2, col=2)
         
-        # Actualizar títulos de ejes
-        fig.update_xaxes(title_text="Macropieza", row=1, col=1)
-        fig.update_xaxes(title_text="Macropieza", row=1, col=2)
-        fig.update_xaxes(title_text="Producto", row=2, col=2)
+        # Actualizar títulos de ejes y rangos
+        fig.update_xaxes(title_text="Macropieza", row=1, col=1, tickfont=dict(size=10))
+        fig.update_xaxes(title_text="Macropieza", row=1, col=2, tickfont=dict(size=10))
+        fig.update_xaxes(title_text="Producto", row=2, col=2, tickfont=dict(size=10))
         
         # Actualizar tamaño de las anotaciones
         for annotation in fig.layout.annotations:
