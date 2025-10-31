@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recordatorios de Pago - Cartera Lomarosa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Sistema de Recordatorios de Pago</h1>
+            <p class="subtitle">Cartera Lomarosa</p>
+        </header>
+
+        <!-- PASO 1: CARGAR ARCHIVOS -->
+        <section class="step-section" id="step1">
+            <div class="step-header">
+                <span class="step-number">1</span>
+                <h2>Cargar Archivos Excel</h2>
+            </div>
+
+            <div class="upload-grid">
+                <!-- Zona drag & drop: Terceros -->
+                <div class="upload-zone" id="dropZoneTerceros">
+                    <div class="upload-icon">📄</div>
+                    <h3>Archivo Excel 1</h3>
+                    <p>Listado de Terceros con Nombre y Email</p>
+                    <p class="file-hint">.xlsx, .xls (cualquier nombre de archivo)</p>
+                    <input type="file" id="fileTerceros" accept=".xlsx,.xls" hidden>
+                    <button class="btn-secondary" onclick="document.getElementById('fileTerceros').click()">
+                        Seleccionar archivo
+                    </button>
+                    <div class="file-info" id="infoTerceros" style="display: none;"></div>
+                </div>
+
+                <!-- Zona drag & drop: Cartera -->
+                <div class="upload-zone" id="dropZoneCartera">
+                    <div class="upload-icon">📊</div>
+                    <h3>Archivo Excel 2</h3>
+                    <p>Cartera por Edades (con Nombre tercero, Factura, Vencimiento, Dias, Saldo)</p>
+                    <p class="file-hint">.xlsx, .xls (el nombre puede variar)</p>
+                    <input type="file" id="fileCartera" accept=".xlsx,.xls" hidden>
+                    <button class="btn-secondary" onclick="document.getElementById('fileCartera').click()">
+                        Seleccionar archivo
+                    </button>
+                    <div class="file-info" id="infoCartera" style="display: none;"></div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn-primary" id="btnAnalizar" disabled>
+                    Analizar Archivos
+                </button>
+            </div>
+        </section>
+
+        <!-- PASO 2: VISTA PREVIA -->
+        <section class="step-section" id="step2" style="display: none;">
+            <div class="step-header">
+                <span class="step-number">2</span>
+                <h2>Vista Previa de Recordatorios</h2>
+            </div>
+
+            <!-- Estadísticas -->
+            <div class="stats-grid">
+                <div class="stat-card stat-warning">
+                    <div class="stat-icon">⏰</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statProximos">0</div>
+                        <div class="stat-label">Próximos a vencer</div>
+                        <div class="stat-sublabel">(< 5 días)</div>
+                    </div>
+                </div>
+
+                <div class="stat-card stat-danger">
+                    <div class="stat-icon">🔴</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statVencidos">0</div>
+                        <div class="stat-label">Vencidos</div>
+                        <div class="stat-sublabel">(ya pasó fecha)</div>
+                    </div>
+                </div>
+
+                <div class="stat-card stat-primary">
+                    <div class="stat-icon">📧</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statTotal">0</div>
+                        <div class="stat-label">Total a enviar</div>
+                        <div class="stat-sublabel">(correos)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de recordatorios -->
+            <div class="table-container">
+                <table class="data-table" id="tablaRecordatorios">
+                    <thead>
+                        <tr>
+                            <th>Estado</th>
+                            <th>Nombre Tercero</th>
+                            <th>Email</th>
+                            <th>Factura</th>
+                            <th>Vencimiento</th>
+                            <th>Días</th>
+                            <th>Saldo</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- PASO 3: ENVIAR CORREOS -->
+        <section class="step-section" id="step3" style="display: none;">
+            <div class="step-header">
+                <span class="step-number">3</span>
+                <h2>Enviar Correos Electrónicos</h2>
+            </div>
+
+            <!-- Advertencia -->
+            <div class="warning-box">
+                <div class="warning-icon">⚠️</div>
+                <div class="warning-content">
+                    <strong>Importante:</strong> Estás a punto de enviar <span id="totalCorreos">0</span> correos electrónicos.
+                    <br>
+                    Esta acción no se puede deshacer.
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="action-buttons">
+                <button class="btn-success" id="btnEnviarCorreos">
+                    <span class="btn-icon">✉️</span>
+                    Enviar Correos Ahora
+                </button>
+            </div>
+
+            <!-- Área de progreso -->
+            <div class="progress-area" id="progressArea" style="display: none;">
+                <h3>Enviando correos...</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <p class="progress-text" id="progressText">Procesando...</p>
+            </div>
+
+            <!-- Área de resultados -->
+            <div class="results-area" id="resultsArea" style="display: none;">
+                <h3>Resultados del Envío</h3>
+
+                <div class="result-summary">
+                    <div class="result-item result-success">
+                        <span class="result-icon">✅</span>
+                        <span class="result-label">Exitosos:</span>
+                        <span class="result-value" id="resultExitosos">0</span>
+                    </div>
+                    <div class="result-item result-error">
+                        <span class="result-icon">❌</span>
+                        <span class="result-label">Fallidos:</span>
+                        <span class="result-value" id="resultFallidos">0</span>
+                    </div>
+                </div>
+
+                <!-- Tabla de detalles -->
+                <div class="table-container">
+                    <h4>Detalles del envío</h4>
+                    <table class="data-table" id="tablaResultados">
+                        <thead>
+                            <tr>
+                                <th>Estado</th>
+                                <th>Nombre Tercero</th>
+                                <th>Email</th>
+                                <th>Factura</th>
+                                <th>Mensaje</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Sistema de Recordatorios de Pago - Cartera Lomarosa</p>
+            <p class="footer-note">Todo el procesamiento se realiza localmente en tu navegador</p>
+        </footer>
+    </div>
+
+    <!-- JavaScript de la aplicación -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

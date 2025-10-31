@@ -1,0 +1,12 @@
+# Framework web para Python
+Flask==3.0.0
+
+# Manejo de CORS (Cross-Origin Resource Sharing) para peticiones desde el navegador
+Flask-CORS==4.0.0
+
+# Carga de variables de entorno desde archivo .env
+python-dotenv==1.0.0
+
+# Lectura y procesamiento de archivos Excel
+pandas==2.1.4
+openpyxl==3.1.2
