@@ -223,13 +223,17 @@ function renderTablaRecordatorios() {
 
         tr.innerHTML = `
             <td><span class="badge ${r.badge_class}">${estadoTexto}</span></td>
-            <td>${r.nombre_tercero || "N/A"}</td>
-            <td>${r.email || "N/A"}</td>
+            <td>${r.cliente || "N/A"}</td>
+            <td>${r.correo_cliente || "N/A"}</td>
+            <td>${r.vendedor || "N/A"}</td>
+            <td>${r.correo_vendedor || "N/A"}</td>
+            <td>${r.local || "N/A"}</td>
             <td class="monospace">${r.numero_factura || "N/A"}</td>
             <td>${r.fecha_vencimiento || "N/A"}</td>
             <td class="monospace">${r.dias}</td>
             <td class="monospace">${r.saldo || "N/A"}</td>
         `;
+
         tbody.appendChild(tr);
     });
 }
@@ -342,7 +346,7 @@ function mostrarResultados(resultado) {
 
             tr.innerHTML = `
                 <td><span class="badge ${badgeClass}">${estadoText}</span></td>
-                <td>${r.nombre_tercero || "N/A"}</td>
+                <td>${r.cliente || "N/A"}</td>
                 <td>${r.destinatario || "N/A"}</td>
                 <td class="monospace">${r.numero_factura || "N/A"}</td>
                 <td>${mensaje}</td>
