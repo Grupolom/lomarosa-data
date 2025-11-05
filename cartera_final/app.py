@@ -9,14 +9,18 @@ from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from threading import Timer
 from dotenv import load_dotenv
+from datetime import datetime, date, timedelta
 import pandas as pd
 from io import BytesIO
+
 
 # Cargar variables de entorno desde .env
 load_dotenv()
 
+
 app = Flask(__name__)
 CORS(app)
+
 
 # ==========================================
 # CONFIGURACIÓN DE CORREO ELECTRÓNICO
@@ -28,11 +32,14 @@ EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD", "")
 EMAIL_FROM_NAME = os.getenv("EMAIL_FROM_NAME", "Cartera Lomarosa")
 EMAIL_FROM_ADDRESS = os.getenv("EMAIL_FROM_ADDRESS", EMAIL_USER)
 
+
 MAX_WORKERS = int(os.getenv("MAX_WORKERS", "3"))
+
 
 # ==========================================
 # FUNCIONES DE NORMALIZACIÓN
 # ==========================================
+
 
 def normalizar_nombre(nombre):
     """Normaliza un nombre para hacer matching: trim + lowercase"""
@@ -40,13 +47,77 @@ def normalizar_nombre(nombre):
         return ""
     return str(nombre).strip().lower()
 
+
 def normalizar_columna(col):
     """Normaliza nombre de columna para búsqueda flexible"""
     return str(col).strip().lower().replace('  ', ' ')
 
+
+# ==========================================
+# FUNCIONES DE AGRUPACIÓN
+# ==========================================
+
+
+def agrupar_recordatorios_por_cliente_y_estado(recordatorios):
+    """Agrupa por cliente, email Y estado - Permite separar clientes con mismo email."""
+    agrupados = {}
+
+    for recordatorio in recordatorios:
+        cliente_nombre = recordatorio.get("cliente")
+        cliente_email = recordatorio.get("correo_cliente")
+        estado = recordatorio.get("estado")
+
+        # Key único: cliente + email + estado (permite separar clientes con mismo email)
+        key = f"{cliente_nombre}|{cliente_email}|{estado}"
+
+        if key not in agrupados:
+            agrupados[key] = {
+                "cliente": cliente_nombre,
+                "correo_cliente": cliente_email,
+                "vendedor": recordatorio.get("vendedor"),
+                "correo_vendedor": recordatorio.get("correo_vendedor"),
+                "local": recordatorio.get("local"),
+                "estado": estado,
+                "facturas": []
+            }
+        
+        agrupados[key]["facturas"].append({
+            "numero_factura": recordatorio.get("numero_factura"),
+            "fecha_emision": recordatorio.get("fecha_emision"),
+            "fecha_vencimiento": recordatorio.get("fecha_vencimiento"),
+            "dias": recordatorio.get("dias"),
+            "saldo": recordatorio.get("saldo"),
+            "saldo_numerico": recordatorio.get("saldo_numerico"),
+            "estado": recordatorio.get("estado")
+        })
+    
+    resultado = list(agrupados.values())
+
+    print(f"\n[INFO] Agrupación por cliente + email + estado:")
+    print(f"  - Recordatorios individuales (facturas): {len(recordatorios)}")
+    print(f"  - Correos a enviar (clientes separados): {len(resultado)}")
+    vencidos = sum(1 for r in resultado if r['estado'] == 'vencido')
+    proximos = sum(1 for r in resultado if r['estado'] == 'proximo')
+    print(f"    • Vencidos: {vencidos}")
+    print(f"    • Próximos: {proximos}")
+    print(f"  - Nota: Clientes con mismo email se envían por separado")
+
+    return resultado
+
+
+
+
+def dividir_en_lotes(recordatorios, limite=450):
+    """Divide los recordatorios en lotes de máximo 'limite' correos."""
+    lote1 = recordatorios[:limite]
+    lote2 = recordatorios[limite:]
+    return lote1, lote2
+
+
 # ==========================================
 # FUNCIONES DE LECTURA DE EXCEL
 # ==========================================
+
 
 def detectar_tipo_excel(df):
     """Detecta si el Excel es Excel 1 (Clientes) o Excel 2 (Cartera) según sus columnas."""
@@ -59,12 +130,10 @@ def detectar_tipo_excel(df):
     print(f"[DEBUG] Primeras 15 columnas: {columnas_lower[:15]}")
     print("=" * 60)
     
-    # Excel 1: Debe tener Nit, Cliente, Correo cliente
     tiene_nit = "nit" in columnas_str
     tiene_cliente = "cliente" in columnas_str
     tiene_correo_cliente = "correo cliente" in columnas_str or "correocliente" in columnas_str.replace(' ', '')
     
-    # Excel 2: Debe tener Nombre tercero, Numero FAC, Vencimiento, Dias, Saldo
     tiene_nombre_tercero = "nombre tercero" in columnas_str or "nombretercero" in columnas_str.replace(' ', '')
     tiene_numero_fac = "numero fac" in columnas_str or "numerofac" in columnas_str.replace(' ', '') or " fac " in columnas_str
     tiene_vencimiento = "vencimiento" in columnas_str
@@ -94,6 +163,7 @@ def detectar_tipo_excel(df):
         print("[DEBUG] ✗ NO DETECTADO (devolviendo None)")
         return None
 
+
 def buscar_columna_exacta(df, nombres_esperados):
     """Busca una columna en el DataFrame con nombres esperados (flexible con espacios)."""
     columnas_map = {normalizar_columna(col): col for col in df.columns}
@@ -114,6 +184,7 @@ def buscar_columna_exacta(df, nombres_esperados):
                 return col_original
     
     return None
+
 
 def leer_excel_clientes(archivo_bytes):
     """Lee Excel 1 (Clientes y Vendedores) y retorna dos diccionarios."""
@@ -171,10 +242,9 @@ def leer_excel_clientes(archivo_bytes):
     
     return dict_clientes, dict_vendedores
 
+
 def leer_excel_cartera(archivo_bytes, dict_clientes, dict_vendedores):
     """Lee Excel 2 (Cartera) - Calcula días desde FECHAS REALES, NO desde columna Días."""
-    from datetime import datetime, date
-    
     df = pd.read_excel(BytesIO(archivo_bytes), sheet_name="Cartera por edades", header=11)
     
     col_nombre_tercero = buscar_columna_exacta(df, ["Nombre tercero", "Nombretercero", "Cliente"])
@@ -208,8 +278,6 @@ def leer_excel_cartera(archivo_bytes, dict_clientes, dict_vendedores):
     
     hoy = date.today()
     print(f"\n[INFO] Fecha de HOY: {hoy.strftime('%d/%m/%Y')}")
-    
-    # ← AGREGAR AQUÍ: Lista para clientes no identificados
     print(f"\n[DEBUG] Clientes NO identificados en Excel 1:")
     print("-" * 80)
     
@@ -220,10 +288,8 @@ def leer_excel_cartera(archivo_bytes, dict_clientes, dict_vendedores):
         
         nombre_tercero_norm = normalizar_nombre(nombre_tercero)
         
-        # ← AQUÍ ESTÁ EL DEBUG:
         if nombre_tercero_norm not in dict_clientes:
             sin_cliente += 1
-            # Mostrar TODOS los clientes no encontrados
             print(f"  [{sin_cliente}] NO ENCONTRADO")
             print(f"       Original: '{nombre_tercero}'")
             print(f"       Normalizado: '{nombre_tercero_norm}'")
@@ -247,12 +313,10 @@ def leer_excel_cartera(archivo_bytes, dict_clientes, dict_vendedores):
         vencimiento = row[col_vencimiento] if pd.notna(row[col_vencimiento]) else None
         saldo = row[col_saldo] if pd.notna(row[col_saldo]) else 0
         
-        # ===== VERIFICAR VENCIMIENTO VACÍO =====
         if not pd.notna(vencimiento):
             vencimiento_vacio += 1
             continue
         
-        # ===== VERIFICAR SALDO EN CERO =====
         try:
             saldo_float = float(saldo)
             if saldo_float == 0:
@@ -261,21 +325,17 @@ def leer_excel_cartera(archivo_bytes, dict_clientes, dict_vendedores):
         except:
             saldo_float = 0
         
-        # ===== CALCULAR DÍAS DESDE LA FECHA DE VENCIMIENTO =====
         try:
             vencimiento_date = pd.to_datetime(vencimiento).date()
             dias = (vencimiento_date - hoy).days
-            
         except Exception as e:
             print(f"[ERROR] Factura {numero_fac}: Error al calcular días: {e}")
             continue
         
-        # ===== LÓGICA CORRECTA =====
         if dias > 5:
             fuera_ventana += 1
             continue
         
-        # Formatear fechas
         try:
             emision_str = pd.to_datetime(emision).strftime("%d/%m/%Y") if pd.notna(emision) else "N/A"
         except:
@@ -288,7 +348,6 @@ def leer_excel_cartera(archivo_bytes, dict_clientes, dict_vendedores):
         except:
             saldo_formateado = "$0"
         
-        # ===== DETERMINAR ESTADO =====
         if dias < 0:
             estado = "vencido"
             badge_class = "badge-danger"
@@ -331,11 +390,10 @@ def leer_excel_cartera(archivo_bytes, dict_clientes, dict_vendedores):
     return recordatorios
 
 
-
-
 # ==========================================
 # FUNCIONES DE ENVÍO DE CORREO
 # ==========================================
+
 
 def crear_mensaje_email(destinatario_principal, destinatario_cc, asunto, cuerpo_html, cuerpo_texto=None):
     """Crea un mensaje de email en formato MIME con CC."""
@@ -355,6 +413,7 @@ def crear_mensaje_email(destinatario_principal, destinatario_cc, asunto, cuerpo_
     mensaje.attach(parte_html)
     
     return mensaje
+
 
 def enviar_email_individual(destinatario_principal, destinatario_cc, asunto, cuerpo_html, cuerpo_texto=None):
     """Envía un correo electrónico individual con CC opcional."""
@@ -414,16 +473,48 @@ def enviar_email_individual(destinatario_principal, destinatario_cc, asunto, cue
             "error": f"Error inesperado: {str(e)}"
         }
 
-def generar_html_recordatorio(recordatorio):
-    """Genera el HTML del correo con logo de Lomarosa."""
-    cliente = recordatorio.get("cliente", "Cliente")
-    numero_fac = recordatorio.get("numero_factura", "N/A")
-    emision = recordatorio.get("fecha_emision", "N/A")
-    vencimiento = recordatorio.get("fecha_vencimiento", "N/A")
-    saldo = recordatorio.get("saldo", "N/A")
+
+def generar_html_recordatorio_agrupado(cliente_agrupado):
+    """Genera HTML con MÚLTIPLES facturas en UN SOLO correo."""
+    cliente = cliente_agrupado.get("cliente", "Cliente")
+    correo_vendedor = cliente_agrupado.get("correo_vendedor", "N/A")
+    vendedor = cliente_agrupado.get("vendedor", "N/A")
+    facturas = cliente_agrupado.get("facturas", [])
     
-    # Logo desde Jumpseller (tu página web)
     logo_url = "https://images.jumpseller.com/store/lomarosa/store/logo/LR_LogotipoEslogan_CMYK.png?1662998750"
+    
+    limite_tabla = 50
+    facturas_mostradas = facturas[:limite_tabla]
+    facturas_ocultas = len(facturas) - limite_tabla
+    
+    filas_facturas = ""
+    
+    for factura in facturas_mostradas:
+        estado_emoji = "🔴" if factura["estado"] == "vencido" else "🟡"
+        estado_texto = "VENCIDO" if factura["estado"] == "vencido" else "PRÓXIMO"
+        
+        filas_facturas += f"""
+        <tr style="border-bottom: 1px solid #e0e0e0;">
+            <td style="padding: 10px; text-align: center;">{estado_emoji} {estado_texto}</td>
+            <td style="padding: 10px; font-weight: bold;">{factura['numero_factura']}</td>
+            <td style="padding: 10px; text-align: center;">{factura['fecha_emision']}</td>
+            <td style="padding: 10px; text-align: center;">{factura['fecha_vencimiento']}</td>
+            <td style="padding: 10px; text-align: center;">{factura['dias']} días</td>
+            <td style="padding: 10px; text-align: right; color: #dc2626; font-weight: bold;">{factura['saldo']}</td>
+        </tr>
+        """
+    
+    total_saldo_real = sum(f["saldo_numerico"] for f in facturas)
+    total_saldo_formateado = f"${total_saldo_real:,.0f}"
+    
+    advertencia_ocultas = ""
+    if facturas_ocultas > 0:
+        advertencia_ocultas = f"""
+        <div style="background-color: #fff3cd; padding: 15px; margin: 15px 0; border-left: 4px solid #ffc107; border-radius: 4px;">
+            <strong>ℹ️ Información:</strong> Este correo muestra las primeras {limite_tabla} facturas de {len(facturas)} totales.
+            Las restantes {facturas_ocultas} facturas están incluidas en el total.
+        </div>
+        """
     
     return f"""
     <!DOCTYPE html>
@@ -432,131 +523,158 @@ def generar_html_recordatorio(recordatorio):
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
-            body {{
-                font-family: Arial, sans-serif;
-                line-height: 1.6;
-                color: #333;
-                max-width: 600px;
-                margin: 0 auto;
-                padding: 20px;
-            }}
-            .logo {{
-                text-align: center;
-                padding: 20px;
-                background-color: #ffffff;
-            }}
-            .logo img {{
-                max-width: 250px;
-                height: auto;
-            }}
-            .header {{
-                background-color: #667eea;
-                color: white;
-                padding: 20px;
-                text-align: center;
-                border-radius: 8px 8px 0 0;
-            }}
-            .content {{
-                background-color: #f8fafc;
-                padding: 30px;
-                border: 1px solid #e2e8f0;
-            }}
-            .footer {{
-                background-color: #0f172a;
-                color: #94a3b8;
-                padding: 20px;
-                text-align: center;
-                font-size: 14px;
-                border-radius: 0 0 8px 8px;
-            }}
-            .highlight {{
-                background-color: #fef3c7;
-                padding: 15px;
-                border-left: 4px solid #f59e0b;
-                margin: 20px 0;
-                border-radius: 4px;
-            }}
+            body {{font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 900px; margin: 0 auto; padding: 20px;}}
+            .container {{background-color: white; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);}}
+            .logo {{text-align: center; padding: 25px;}}
+            .logo img {{max-width: 250px;}}
+            .header {{background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;}}
+            .header h1 {{margin: 0; font-size: 26px;}}
+            .content {{padding: 30px;}}
+            .resumen {{display: flex; justify-content: space-around; margin: 20px 0; background-color: #f8f9fa; padding: 20px; border-radius: 8px; flex-wrap: wrap;}}
+            .resumen-item {{text-align: center; margin: 10px;}}
+            .resumen-numero {{font-size: 32px; font-weight: bold; color: #667eea;}}
+            .tabla-facturas {{width: 100%; border-collapse: collapse; margin: 20px 0;}}
+            .tabla-facturas th {{background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px; text-align: left; font-weight: 600;}}
+            .tabla-facturas td {{padding: 10px 12px; font-size: 14px;}}
+            .total-row {{background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); font-weight: bold; border-top: 3px solid #667eea;}}
+            .info-vendedor {{background-color: #e3f2fd; padding: 15px; margin: 20px 0; border-left: 4px solid #2196F3; border-radius: 4px;}}
+            .footer {{background-color: #0f172a; color: #94a3b8; padding: 25px; text-align: center; border-radius: 0 0 10px 10px;}}
         </style>
     </head>
     <body>
-        <div class="logo">
-            <img src="{logo_url}" alt="Lomarosa - Campo bien hecho, cerdos bien criados">
-        </div>
-        
-        <div class="header">
-            <h1>Recordatorio de Vencimiento de Factura</h1>
-        </div>
-        
-        <div class="content">
-            <p>Querido Cliente <strong>{cliente}</strong>,</p>
-            
-            <p>Su factura con número <strong>{numero_fac}</strong> que fue emitida el <strong>{emision}</strong> 
-            se vencerá pronto, exactamente el <strong>{vencimiento}</strong> y recuerde que tiene un saldo de 
-            <strong style="color: #dc2626; font-size: 18px;">{saldo} COP</strong>.</p>
-            
-            <div class="highlight">
-                <strong>Detalles de la factura:</strong><br>
-                📄 Número: {numero_fac}<br>
-                📅 Emisión: {emision}<br>
-                ⏰ Vencimiento: {vencimiento}<br>
-                💰 Saldo: {saldo} COP
+        <div class="container">
+            <div class="logo">
+                <img src="{logo_url}" alt="Lomarosa">
             </div>
             
-            <p>Agradecemos realizar el pago oportunamente para evitar inconvenientes.</p>
-        </div>
-        
-        <div class="footer">
-            <p><strong>Atentamente,</strong><br>
-            <strong>Lomarosa</strong><br>
-            <em>Campo bien hecho, cerdos bien criados</em></p>
-            <hr style="border: 1px solid #475569; margin: 15px 0;">
-            <p style="font-size: 12px;">Este es un mensaje automático. Por favor no responder a este correo.</p>
+            <div class="header">
+                <h1>📧 Recordatorio de Vencimiento de Facturas</h1>
+                <p>Cliente: <strong>{cliente}</strong></p>
+            </div>
+            
+            <div class="content">
+                <p>Estimado Cliente <strong>{cliente}</strong>,</p>
+                <p>A continuación presentamos el detalle de sus facturas vencidas y próximas a vencer:</p>
+                
+                <div class="resumen">
+                    <div class="resumen-item">
+                        <div class="resumen-numero">{len(facturas)}</div>
+                        <div>Facturas Totales</div>
+                    </div>
+                    <div class="resumen-item">
+                        <div class="resumen-numero" style="color: #dc2626;">{sum(1 for f in facturas if f['estado'] == 'vencido')}</div>
+                        <div>Vencidas</div>
+                    </div>
+                    <div class="resumen-item">
+                        <div class="resumen-numero" style="color: #f59e0b;">{sum(1 for f in facturas if f['estado'] == 'proximo')}</div>
+                        <div>Próximas</div>
+                    </div>
+                    <div class="resumen-item">
+                        <div class="resumen-numero" style="color: #dc2626;">{total_saldo_formateado}</div>
+                        <div>Saldo Total</div>
+                    </div>
+                </div>
+                
+                {advertencia_ocultas}
+                
+                <table class="tabla-facturas">
+                    <thead>
+                        <tr>
+                            <th>Estado</th>
+                            <th>Factura</th>
+                            <th>Emisión</th>
+                            <th>Vencimiento</th>
+                            <th>Días</th>
+                            <th style="text-align: right;">Saldo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filas_facturas}
+                        <tr class="total-row">
+                            <td colspan="5" style="text-align: right; padding: 15px;"><strong>TOTAL GENERAL:</strong></td>
+                            <td style="text-align: right; padding: 15px; font-size: 18px;"><strong>{total_saldo_formateado}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="info-vendedor">
+                    <strong>👤 Vendedor asignado:</strong> {vendedor}<br>
+                    <strong>📧 Contacto:</strong> {correo_vendedor if correo_vendedor != 'N/A' else 'No asignado'}<br>
+                    <strong>📞 Para consultas:</strong> Comuníquese con su vendedor
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p><strong>Lomarosa</strong><br>
+                <em>Campo bien hecho, cerdos bien criados</em></p>
+                <hr style="border: 1px solid #475569; margin: 15px 0;">
+                <p style="font-size: 11px;">Este es un mensaje automático. No responder directamente a este correo.</p>
+            </div>
         </div>
     </body>
     </html>
     """
 
 
-def generar_texto_recordatorio(recordatorio):
-    """Genera la versión en texto plano del recordatorio."""
-    cliente = recordatorio.get("cliente", "Cliente")
-    numero_fac = recordatorio.get("numero_factura", "N/A")
-    emision = recordatorio.get("fecha_emision", "N/A")
-    vencimiento = recordatorio.get("fecha_vencimiento", "N/A")
-    saldo = recordatorio.get("saldo", "N/A")
+def _enviar_lote_agrupado(recordatorios_agrupados):
+    """Envía lote de correos AGRUPADOS."""
+    resultados = []
     
-    return f"""
-Recordatorio de Vencimiento de Factura
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        tareas = {}
+        
+        for cliente_agrupado in recordatorios_agrupados:
+            destinatario_principal = cliente_agrupado.get("correo_cliente", "")
+            destinatario_cc = cliente_agrupado.get("correo_vendedor", None)
+            
+            asunto = f"Recordatorio de Vencimiento - {len(cliente_agrupado['facturas'])} facturas - {cliente_agrupado.get('cliente', 'Cliente')}"
+            cuerpo_html = generar_html_recordatorio_agrupado(cliente_agrupado)
+            cuerpo_texto = f"Tiene {len(cliente_agrupado['facturas'])} facturas vencidas o próximas a vencer"
+            
+            future = executor.submit(
+                enviar_email_individual,
+                destinatario_principal,
+                destinatario_cc,
+                asunto,
+                cuerpo_html,
+                cuerpo_texto
+            )
+            
+            tareas[future] = cliente_agrupado
+        
+        for future in as_completed(tareas):
+            cliente_agrupado = tareas[future]
+            try:
+                resultado = future.result()
+                resultados.append({
+                    "destinatario": resultado["destinatario"],
+                    "cliente": cliente_agrupado.get("cliente"),
+                    "facturas": len(cliente_agrupado.get("facturas", [])),
+                    "success": resultado["success"],
+                    "error": resultado["error"]
+                })
+            except Exception as e:
+                resultados.append({
+                    "destinatario": cliente_agrupado.get("correo_cliente"),
+                    "cliente": cliente_agrupado.get("cliente"),
+                    "facturas": len(cliente_agrupado.get("facturas", [])),
+                    "success": False,
+                    "error": str(e)
+                })
+    
+    return resultados
 
-Querido Cliente {cliente},
-
-Su factura con número {numero_fac} que fue emitida el {emision} se vencerá pronto, 
-exactamente el {vencimiento} y recuerde que tiene un saldo de {saldo} COP.
-
-Detalles de la factura:
-- Número: {numero_fac}
-- Emisión: {emision}
-- Vencimiento: {vencimiento}
-- Saldo: {saldo} COP
-
-Agradecemos realizar el pago oportunamente para evitar inconvenientes.
-
-Atentamente,
-Lomarosa
-Campo bien hecho, cerdos bien criados
-
----
-Este es un mensaje automático. Por favor no responder a este correo.
-"""
 
 # ==========================================
 # RUTAS DE LA APLICACIÓN
 # ==========================================
 
+
 @app.route("/")
 def index():
     """Renderiza la página principal."""
     return render_template("index.html")
+
 
 @app.route("/test-email", methods=["GET"])
 def test_email():
@@ -619,6 +737,7 @@ def test_email():
             "message": "Error al probar configuración SMTP",
             "error": str(e)
         }), 500
+
 
 @app.route("/procesar-excel", methods=["POST"])
 def procesar_excel():
@@ -705,14 +824,14 @@ def procesar_excel():
 
 @app.route("/enviar-correos", methods=["POST"])
 def enviar_correos():
-    """Envía correos de recordatorio en paralelo con CC al vendedor."""
+    """Envía correos AGRUPADOS por cliente Y estado (vencido/próximo)."""
     try:
         datos = request.get_json()
         
         if not datos or "recordatorios" not in datos:
             return jsonify({
                 "success": False,
-                "message": "Formato de datos incorrecto. Se espera un JSON con la clave 'recordatorios'."
+                "message": "Datos incorrecto"
             }), 400
         
         recordatorios = datos["recordatorios"]
@@ -720,66 +839,30 @@ def enviar_correos():
         if not isinstance(recordatorios, list) or len(recordatorios) == 0:
             return jsonify({
                 "success": False,
-                "message": "La lista de recordatorios está vacía o no es válida."
+                "message": "Lista vacía"
             }), 400
         
         if not EMAIL_USER or not EMAIL_PASSWORD:
             return jsonify({
                 "success": False,
-                "message": "Credenciales de correo no configuradas. Revisa el archivo .env"
+                "message": "Credenciales no configuradas"
             }), 500
         
-        resultados = []
+        # ← AGRUPAR por cliente + email + estado (separa clientes con mismo email)
+        print("\n[INFO] Agrupando recordatorios por cliente + email + estado...")
+        recordatorios_agrupados = agrupar_recordatorios_por_cliente_y_estado(recordatorios)
         
-        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-            tareas = {}
-            
-            for recordatorio in recordatorios:
-                destinatario_principal = recordatorio.get("correo_cliente", "")
-                destinatario_cc = recordatorio.get("correo_vendedor", None)
-                
-                asunto = f"Recordatorio de Vencimiento - Factura {recordatorio.get('numero_factura', 'N/A')}"
-                cuerpo_html = generar_html_recordatorio(recordatorio)
-                cuerpo_texto = generar_texto_recordatorio(recordatorio)
-                
-                future = executor.submit(
-                    enviar_email_individual,
-                    destinatario_principal,
-                    destinatario_cc,
-                    asunto,
-                    cuerpo_html,
-                    cuerpo_texto
-                )
-                
-                tareas[future] = recordatorio
-            
-            for future in as_completed(tareas):
-                recordatorio = tareas[future]
-                try:
-                    resultado = future.result()
-                    resultados.append({
-                        "destinatario": resultado["destinatario"],
-                        "destinatario_cc": resultado.get("destinatario_cc"),
-                        "numero_factura": recordatorio.get("numero_factura", "N/A"),
-                        "cliente": recordatorio.get("cliente", "N/A"),
-                        "success": resultado["success"],
-                        "error": resultado["error"]
-                    })
-                except Exception as e:
-                    resultados.append({
-                        "destinatario": recordatorio.get("correo_cliente", "N/A"),
-                        "destinatario_cc": recordatorio.get("correo_vendedor"),
-                        "numero_factura": recordatorio.get("numero_factura", "N/A"),
-                        "cliente": recordatorio.get("cliente", "N/A"),
-                        "success": False,
-                        "error": f"Error inesperado: {str(e)}"
-                    })
+        print(f"\n[INFO] Iniciando envío de {len(recordatorios_agrupados)} correos agrupados...")
+        
+        # ← ENVIAR LOTE
+        resultados = _enviar_lote_agrupado(recordatorios_agrupados)
         
         exitosos = sum(1 for r in resultados if r["success"])
         fallidos = len(resultados) - exitosos
         
         return jsonify({
-            "success": exitosos > 0,
+            "success": True,
+            "message": f"✅ Envío completado: {len(recordatorios_agrupados)} correos consolidados",
             "total": len(resultados),
             "exitosos": exitosos,
             "fallidos": fallidos,
@@ -789,13 +872,16 @@ def enviar_correos():
     except Exception as e:
         return jsonify({
             "success": False,
-            "message": "Error al procesar la solicitud",
             "error": str(e)
         }), 500
+
+
+
 
 def abrir_navegador():
     """Abre el navegador en http://localhost:5000 después de 1.5 segundos."""
     webbrowser.open("http://localhost:5000")
+
 
 if __name__ == "__main__":
     print("=" * 60)

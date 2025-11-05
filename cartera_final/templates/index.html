@@ -21,12 +21,11 @@
             </div>
 
             <div class="upload-grid">
-                <!-- Zona drag & drop: Terceros -->
                 <div class="upload-zone" id="dropZoneTerceros">
                     <div class="upload-icon">📄</div>
                     <h3>Archivo Excel 1</h3>
                     <p>Listado de Terceros con Nombre y Email</p>
-                    <p class="file-hint">.xlsx, .xls (cualquier nombre de archivo)</p>
+                    <p class="file-hint">.xlsx, .xls</p>
                     <input type="file" id="fileTerceros" accept=".xlsx,.xls" hidden>
                     <button class="btn-secondary" onclick="document.getElementById('fileTerceros').click()">
                         Seleccionar archivo
@@ -34,12 +33,11 @@
                     <div class="file-info" id="infoTerceros" style="display: none;"></div>
                 </div>
 
-                <!-- Zona drag & drop: Cartera -->
                 <div class="upload-zone" id="dropZoneCartera">
                     <div class="upload-icon">📊</div>
                     <h3>Archivo Excel 2</h3>
-                    <p>Cartera por Edades (con Nombre tercero, Factura, Vencimiento, Dias, Saldo)</p>
-                    <p class="file-hint">.xlsx, .xls (el nombre puede variar)</p>
+                    <p>Cartera por Edades (Nombre tercero, Factura, Vencimiento, Saldo)</p>
+                    <p class="file-hint">.xlsx, .xls</p>
                     <input type="file" id="fileCartera" accept=".xlsx,.xls" hidden>
                     <button class="btn-secondary" onclick="document.getElementById('fileCartera').click()">
                         Seleccionar archivo
@@ -55,7 +53,7 @@
             </div>
         </section>
 
-        <!-- PASO 2: VISTA PREVIA -->
+        <!-- PASO 2: VISTA PREVIA - VENCIDOS -->
         <section class="step-section" id="step2" style="display: none;">
             <div class="step-header">
                 <span class="step-number">2</span>
@@ -92,94 +90,159 @@
                 </div>
             </div>
 
-            <!-- Tabla de recordatorios -->
-            <div class="table-container">
-                <table class="data-table" id="tablaRecordatorios">
-                    <thead>
-                        <tr>
-                            <th>Estado</th>
-                            <th>Nombre Tercero</th>
-                            <th>Email Cliente</th>
-                            <th>Vendedor</th>
-                            <th>Email Vendedor</th>
-                            <th>Local</th>
-                            <th>Factura</th>
-                            <th>Vencimiento</th>
-                            <th>Días</th>
-                            <th>Saldo</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+            <!-- FILTRO DE BÚSQUEDA GENERAL -->
+            <div style="margin: 20px 0;">
+                <input type="text" id="filterClientes" placeholder="🔍 Buscar cliente..." 
+                       style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
+            </div>
+
+            <!-- ==================== TABLA VENCIDOS ==================== -->
+            <div style="margin-top: 30px;">
+                <h3 style="color: #dc2626; border-bottom: 3px solid #dc2626; padding-bottom: 10px;">
+                    🔴 FACTURAS VENCIDAS (<span id="countVencidosTabla">0</span>)
+                </h3>
+
+                <div style="display: flex; align-items: center; gap: 10px; margin: 15px 0;">
+                    <input type="checkbox" id="selectAllVencidos" checked>
+                    <label for="selectAllVencidos" style="cursor: pointer; font-weight: bold;">Seleccionar todos</label>
+                </div>
+
+                <div class="table-container" style="max-height: 600px; overflow-y: auto;">
+                    <table class="data-table" id="tablaVencidos">
+                        <thead style="position: sticky; top: 0; background: white; z-index: 10;">
+                            <tr>
+                                <th style="width: 40px;"><input type="checkbox" class="check-all-vencidos" checked></th>
+                                <th>Cliente</th>
+                                <th>Email</th>
+                                <th>Vendedor</th>
+                                <th>Vencidas</th>
+                                <th>Detalle</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyVencidos"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ==================== TABLA PRÓXIMOS ==================== -->
+            <div style="margin-top: 40px;">
+                <h3 style="color: #f59e0b; border-bottom: 3px solid #f59e0b; padding-bottom: 10px;">
+                    🟡 FACTURAS PRÓXIMAS A VENCER (<span id="countProximosTabla">0</span>)
+                </h3>
+
+                <div style="display: flex; align-items: center; gap: 10px; margin: 15px 0;">
+                    <input type="checkbox" id="selectAllProximos" checked>
+                    <label for="selectAllProximos" style="cursor: pointer; font-weight: bold;">Seleccionar todos</label>
+                </div>
+
+                <div class="table-container" style="max-height: 600px; overflow-y: auto;">
+                    <table class="data-table" id="tablaProximos">
+                        <thead style="position: sticky; top: 0; background: white; z-index: 10;">
+                            <tr>
+                                <th style="width: 40px;"><input type="checkbox" class="check-all-proximos" checked></th>
+                                <th>Cliente</th>
+                                <th>Email</th>
+                                <th>Vendedor</th>
+                                <th>Próximas</th>
+                                <th>Detalle</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyProximos"></tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
-        <!-- PASO 3: ENVIAR CORREOS -->
+        <!-- PASO 3: ENVIAR CORREOS VENCIDOS -->
         <section class="step-section" id="step3" style="display: none;">
             <div class="step-header">
                 <span class="step-number">3</span>
-                <h2>Enviar Correos Electrónicos</h2>
+                <h2>Enviar Correos - FACTURAS VENCIDAS</h2>
             </div>
 
-            <!-- Advertencia -->
             <div class="warning-box">
                 <div class="warning-icon">⚠️</div>
                 <div class="warning-content">
-                    <strong>Importante:</strong> Estás a punto de enviar <span id="totalCorreos">0</span> correos electrónicos.
-                    <br>
-                    Esta acción no se puede deshacer.
+                    <strong>Importante:</strong> Estás a punto de enviar <span id="countVencidosEnviar">0</span> correos de facturas <strong>VENCIDAS</strong>.
+                    <br>Esta acción no se puede deshacer.
                 </div>
             </div>
 
-            <!-- Botones de acción -->
             <div class="action-buttons">
-                <button class="btn-success" id="btnEnviarCorreos">
+                <button class="btn-success" id="btnEnviarVencidos" style="background-color: #dc2626;">
                     <span class="btn-icon">✉️</span>
-                    Enviar Correos Ahora
+                    Enviar Correos Vencidos Ahora
                 </button>
             </div>
 
-            <!-- Área de progreso -->
-            <div class="progress-area" id="progressArea" style="display: none;">
-                <h3>Enviando correos...</h3>
+            <div class="progress-area" id="progressAreaVencidos" style="display: none;">
+                <h3>Enviando correos de vencidos...</h3>
                 <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
+                    <div class="progress-fill" id="progressFillVencidos"></div>
                 </div>
-                <p class="progress-text" id="progressText">Procesando...</p>
+                <p class="progress-text" id="progressTextVencidos">Procesando...</p>
             </div>
 
-            <!-- Área de resultados -->
-            <div class="results-area" id="resultsArea" style="display: none;">
-                <h3>Resultados del Envío</h3>
-
+            <div class="results-area" id="resultsAreaVencidos" style="display: none;">
+                <h3>Resultados del Envío - Vencidos</h3>
                 <div class="result-summary">
                     <div class="result-item result-success">
                         <span class="result-icon">✅</span>
                         <span class="result-label">Exitosos:</span>
-                        <span class="result-value" id="resultExitosos">0</span>
+                        <span class="result-value" id="resultExitososVencidos">0</span>
                     </div>
                     <div class="result-item result-error">
                         <span class="result-icon">❌</span>
                         <span class="result-label">Fallidos:</span>
-                        <span class="result-value" id="resultFallidos">0</span>
+                        <span class="result-value" id="resultFallidosVencidos">0</span>
                     </div>
                 </div>
+            </div>
+        </section>
 
-                <!-- Tabla de detalles -->
-                <div class="table-container">
-                    <h4>Detalles del envío</h4>
-                    <table class="data-table" id="tablaResultados">
-                        <thead>
-                            <tr>
-                                <th>Estado</th>
-                                <th>Nombre Tercero</th>
-                                <th>Email</th>
-                                <th>Factura</th>
-                                <th>Mensaje</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+        <!-- PASO 4: ENVIAR CORREOS PRÓXIMOS -->
+        <section class="step-section" id="step4" style="display: none;">
+            <div class="step-header">
+                <span class="step-number">4</span>
+                <h2>Enviar Correos - FACTURAS PRÓXIMAS A VENCER</h2>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-icon">⚠️</div>
+                <div class="warning-content">
+                    <strong>Importante:</strong> Estás a punto de enviar <span id="countProximosEnviar">0</span> correos de facturas <strong>PRÓXIMAS A VENCER</strong>.
+                    <br>Esta acción no se puede deshacer.
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn-success" id="btnEnviarProximos" style="background-color: #f59e0b;">
+                    <span class="btn-icon">✉️</span>
+                    Enviar Correos Próximos Ahora
+                </button>
+            </div>
+
+            <div class="progress-area" id="progressAreaProximos" style="display: none;">
+                <h3>Enviando correos de próximos...</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFillProximos"></div>
+                </div>
+                <p class="progress-text" id="progressTextProximos">Procesando...</p>
+            </div>
+
+            <div class="results-area" id="resultsAreaProximos" style="display: none;">
+                <h3>Resultados del Envío - Próximos</h3>
+                <div class="result-summary">
+                    <div class="result-item result-success">
+                        <span class="result-icon">✅</span>
+                        <span class="result-label">Exitosos:</span>
+                        <span class="result-value" id="resultExitososProximos">0</span>
+                    </div>
+                    <div class="result-item result-error">
+                        <span class="result-icon">❌</span>
+                        <span class="result-label">Fallidos:</span>
+                        <span class="result-value" id="resultFallidosProximos">0</span>
+                    </div>
                 </div>
             </div>
         </section>
@@ -191,7 +254,7 @@
         </footer>
     </div>
 
-    <!-- JavaScript de la aplicación -->
+    <!-- JavaScript -->
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

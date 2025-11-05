@@ -660,3 +660,19 @@ button:disabled {
         gap: 1rem;
     }
 }
+
+.btn-expand {
+    background: var(--color-primary);
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.btn-expand:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-2px);
+}
